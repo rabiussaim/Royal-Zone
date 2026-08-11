@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /owner-dashboard
+Disallow: /checkout
+Disallow: /cart
+
+Sitemap: https://royalzone.pk/sitemap.xml
