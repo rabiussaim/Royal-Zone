@@ -178,7 +178,7 @@ const ProductCard = ({ product: initialProduct, onQuickView, onDelete }) => {
             <StarRating rating={product.rating || 4.8} count={product.reviewCount || 45} size="sm" />
           </div>
 
-          <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-bold text-gray-900 dark:text-white text-base">{formatPrice(product.price)}</span>
               {product.oldPrice && product.oldPrice > product.price && (
@@ -196,9 +196,9 @@ const ProductCard = ({ product: initialProduct, onQuickView, onDelete }) => {
               type="button"
               onClick={handleQuickView}
               title="Quick View"
-              className="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-200 hover:bg-gold-500 hover:text-white dark:hover:bg-gold-500 dark:hover:text-white hover:border-gold-500 transition-all duration-300 flex items-center justify-center shrink-0"
+              className="p-2 sm:p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-200 hover:bg-gold-500 hover:text-white dark:hover:bg-gold-500 dark:hover:text-white hover:border-gold-500 transition-all duration-300 flex items-center justify-center shrink-0"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
@@ -208,24 +208,24 @@ const ProductCard = ({ product: initialProduct, onQuickView, onDelete }) => {
             <button
               onClick={handleAddToCart}
               disabled={addingToCart || product.stock === 0}
-              className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 py-2 sm:py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {addingToCart ? (
                 <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  Adding...
+                  <span className="hidden sm:inline">Adding...</span>
                 </>
               ) : product.stock === 0 ? (
-                'Out of Stock'
+                <span className="text-xs sm:text-sm">Out of Stock</span>
               ) : (
                 <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  Add to Cart
+                  <span className="hidden sm:inline">Add to Cart</span>
                 </>
               )}
             </button>
