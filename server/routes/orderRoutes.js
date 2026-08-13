@@ -7,12 +7,17 @@ const {
   updateOrderStatus,
   createPaymentIntent,
   getStripeConfig,
+  verifyPaymentByToken,
 } = require('../controllers/orderController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Public: Stripe publishable key config
+// ── Public: Owner clicks "Verify Payment" link from email ─────────────────────
+// No auth required — token-based security
+router.get('/verify-payment/:token', verifyPaymentByToken);
+
+// ── Public: Stripe publishable key config ─────────────────────────────────────
 router.get('/stripe-config', protect, getStripeConfig);
 
 router.use(protect);

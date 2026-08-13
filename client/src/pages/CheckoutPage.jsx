@@ -1,15 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
 import { orderService } from '../services/orderService';
 import { formatPrice } from '../utils/helpers';
 
-// Stripe imports (lazy loaded only if Stripe is available)
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
-import StripeCardForm from '../components/payment/StripeCardForm';
 
 // ── Bank details (update with your real bank info) ───────────────────────────
 const BANK_DETAILS = {
@@ -19,6 +15,12 @@ const BANK_DETAILS = {
   iban: 'PK69BAHL0160098100619001',
   branch: 'Online',
   instructions: 'Transfer the exact amount and send screenshot to WhatsApp: +92-336-7947525 within 24 hours to confirm your order.',
+};
+
+const EASYPAISA_DETAILS = {
+  number: '03323783711',
+  iban: 'PK39TMFB0000000042714749',
+  instructions: 'Send payment to the number above, then send screenshot to WhatsApp: +92-336-7947525 to confirm your order.',
 };
 
 const PAYMENT_METHODS = [
@@ -37,11 +39,11 @@ const PAYMENT_METHODS = [
     color: 'blue',
   },
   {
-    value: 'card',
-    label: 'Card Payment',
-    icon: '💳',
-    desc: 'Visa, Mastercard via Stripe',
-    color: 'purple',
+    value: 'easypaisa',
+    label: 'EasyPaisa',
+    icon: '⚡',
+    desc: 'Pay via EasyPaisa mobile account',
+    color: 'teal',
   },
 ];
 
@@ -68,6 +70,7 @@ const CheckoutPage = () => {
   const { items, subtotal, clearCart } = useCart();
   const { user } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -86,51 +89,11 @@ const CheckoutPage = () => {
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [errors, setErrors] = useState({});
 
-  // Stripe state
-  const [stripeAvailable, setStripeAvailable] = useState(false);
-  const [stripePromise, setStripePromise] = useState(null);
-  const [clientSecret, setClientSecret] = useState('');
-  const [stripeLoading, setStripeLoading] = useState(false);
-  const [paymentIntentId, setPaymentIntentId] = useState('');
-  const [cardPaid, setCardPaid] = useState(false);
 
   // ── Pricing ────────────────────────────────────────────────────────────────
   const shippingCost = subtotal >= 5000 ? 0 : 200;
   const tax = Math.round(subtotal * 0.17);
   const grandTotal = subtotal + shippingCost + tax;
-
-  // ── Load Stripe config on mount ───────────────────────────────────────────
-  useEffect(() => {
-    orderService.getStripeConfig()
-      .then(({ stripeAvailable: avail, publishableKey }) => {
-        setStripeAvailable(!!avail);
-        if (avail && publishableKey) {
-          setStripePromise(loadStripe(publishableKey));
-        }
-      })
-      .catch(() => setStripeAvailable(false));
-  }, []);
-
-  // ── Create payment intent when card is selected & form valid ───────────────
-  const initStripePayment = useCallback(async () => {
-    if (!stripeAvailable || !grandTotal) return;
-    setStripeLoading(true);
-    try {
-      const data = await orderService.createPaymentIntent(grandTotal);
-      setClientSecret(data.clientSecret);
-    } catch (err) {
-      toast('Could not initialize card payment. Please try another method.', 'error');
-      setPaymentMethod('cod');
-    } finally {
-      setStripeLoading(false);
-    }
-  }, [stripeAvailable, grandTotal]);
-
-  useEffect(() => {
-    if (paymentMethod === 'card' && stripeAvailable && !clientSecret) {
-      initStripePayment();
-    }
-  }, [paymentMethod, stripeAvailable, clientSecret, initStripePayment]);
 
   // ── Validation ─────────────────────────────────────────────────────────────
   const validate = () => {
@@ -151,23 +114,16 @@ const CheckoutPage = () => {
     setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  // ── Place Order (COD / Bank) ───────────────────────────────────────────────
+  // ── Place Order (COD / Bank / EasyPaisa) ─────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
     if (!items.length) { toast('Your cart is empty', 'error'); return; }
-
-    // Card payment must be done via Stripe first
-    if (paymentMethod === 'card' && !cardPaid) {
-      toast('Please complete your card payment first using the card form below.', 'warning');
-      return;
-    }
-
-    await placeOrder(paymentIntentId || null);
+    await placeOrder();
   };
 
-  // ── Core order creation (called after successful Stripe payment too) ────────
-  const placeOrder = async (stripeId = null) => {
+  // ── Core order creation ───────────────────────────────────────────────────
+  const placeOrder = async () => {
     setLoading(true);
     try {
       const orderItems = items.map((item) => ({
@@ -179,76 +135,62 @@ const CheckoutPage = () => {
         size: item.size || '',
       }));
 
-      let order;
-      try {
-        const data = await orderService.createOrder({
-          items: orderItems,
-          shippingAddress: {
-            name: form.name,
-            street: form.street,
-            city: form.city,
-            state: form.state,
-            zipCode: form.zipCode || '00000',
-            country: form.country,
-            phone: form.phone,
-          },
-          paymentMethod,
-          subtotal,
-          shippingCost,
-          tax,
-          total: grandTotal,
-          notes: form.notes,
-          ...(stripeId && { stripePaymentIntentId: stripeId }),
-        });
-        order = data.order || data.data || data;
-      } catch {
-        // Offline/demo fallback
-        order = {
-          orderNumber: `RZ-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`,
-          total: grandTotal,
-          orderStatus: 'pending',
-          paymentMethod,
-        };
-      }
+      const data = await orderService.createOrder({
+        items: orderItems,
+        shippingAddress: {
+          name: form.name,
+          street: form.street,
+          city: form.city,
+          state: form.state,
+          zipCode: form.zipCode || '00000',
+          country: form.country,
+          phone: form.phone,
+        },
+        paymentMethod,
+        subtotal,
+        shippingCost,
+        tax,
+        total: grandTotal,
+        notes: form.notes,
+        customerEmail: form.email,
+      });
 
+      const order = data.order || data.data || data;
       await clearCart();
       setOrderSuccess(order);
     } catch (err) {
-      toast(err.response?.data?.message || 'Order failed. Please try again.', 'error');
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message || err?.message || 'Order failed. Please try again.';
+      if (status === 401) {
+        toast('Please login to place an order.', 'error');
+        setTimeout(() => navigate('/login'), 1200);
+      } else {
+        toast(msg, 'error');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Stripe success callback ────────────────────────────────────────────────
-  const handleStripeSuccess = async (intentId) => {
-    setPaymentIntentId(intentId);
-    setCardPaid(true);
-    toast('Payment successful! Placing your order...', 'success');
-    await placeOrder(intentId);
-  };
-
-  const handleStripeError = (msg) => {
-    toast(msg || 'Card payment failed. Please try again.', 'error');
-  };
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  SUCCESS SCREEN
   // ═══════════════════════════════════════════════════════════════════════════
   if (orderSuccess) {
     const isBankTransfer = (orderSuccess.paymentMethod || paymentMethod) === 'bank';
-    const isCard = (orderSuccess.paymentMethod || paymentMethod) === 'card';
+    const isEasyPaisa = (orderSuccess.paymentMethod || paymentMethod) === 'easypaisa';
+    const isManual = isBankTransfer || isEasyPaisa;
 
     return (
       <div className="pt-24 min-h-screen bg-cream-50 dark:bg-navy-900 flex items-center justify-center px-4 py-12">
         <div className="max-w-lg w-full bg-white dark:bg-navy-800 rounded-3xl p-8 md:p-10 text-center shadow-luxury animate-zoom-in">
-          <div className="text-7xl mb-5 animate-float">{isBankTransfer ? '🏦' : isCard ? '✅' : '🎉'}</div>
+          <div className="text-7xl mb-5 animate-float">{isEasyPaisa ? '⚡' : isBankTransfer ? '🏦' : '🎉'}</div>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
-            {isBankTransfer ? 'Order Placed!' : 'Order Confirmed!'}
+            {isManual ? 'Order Placed!' : 'Order Confirmed!'}
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">
-            {isBankTransfer
-              ? 'Please complete bank transfer to confirm your order.'
+            {isManual
+              ? 'Your order is placed. Please complete payment to confirm.'
               : 'Thank you for shopping with Royal Zone. Your luxury items are on their way!'}
           </p>
 
@@ -258,6 +200,32 @@ const CheckoutPage = () => {
             <p className="font-display text-2xl font-bold text-gold-500">{orderSuccess.orderNumber}</p>
             <p className="text-sm text-gray-500 mt-2">Total: {formatPrice(orderSuccess.total || grandTotal)}</p>
           </div>
+
+          {/* EasyPaisa Payment Instructions */}
+          {isEasyPaisa && (
+            <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700 rounded-2xl p-5 mb-6 text-left">
+              <h3 className="font-bold text-teal-800 dark:text-teal-300 mb-3 flex items-center gap-2">
+                ⚡ EasyPaisa Payment Details
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">EasyPaisa Number:</span>
+                  <span className="font-mono font-bold text-gray-900 dark:text-white">{EASYPAISA_DETAILS.number}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">IBAN:</span>
+                  <span className="font-mono font-semibold text-xs text-gray-900 dark:text-white">{EASYPAISA_DETAILS.iban}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Amount:</span>
+                  <span className="font-bold text-gold-500 text-base">{formatPrice(orderSuccess.total || grandTotal)}</span>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-teal-200 dark:border-teal-700">
+                <p className="text-xs text-teal-700 dark:text-teal-400">📸 {EASYPAISA_DETAILS.instructions}</p>
+              </div>
+            </div>
+          )}
 
           {/* Bank Transfer Instructions */}
           {isBankTransfer && (
@@ -296,7 +264,7 @@ const CheckoutPage = () => {
           {/* Payment Method Badge */}
           <div className="flex items-center justify-center gap-2 mb-6">
             <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full">
-              {isCard ? '✅ Payment Received' : isBankTransfer ? '⏳ Awaiting Transfer' : '📦 COD — Pay on Delivery'}
+              {isEasyPaisa ? '⚡ EasyPaisa — Awaiting Verification' : isBankTransfer ? '⏳ Awaiting Transfer' : '📦 COD — Pay on Delivery'}
             </span>
           </div>
 
@@ -369,34 +337,22 @@ const CheckoutPage = () => {
                     Payment Method
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    {PAYMENT_METHODS.map((pm) => {
-                      const isDisabled = pm.value === 'card' && !stripeAvailable;
-                      return (
+                    {PAYMENT_METHODS.map((pm) => (
                         <button
                           key={pm.value}
                           type="button"
-                          disabled={isDisabled}
-                          onClick={() => {
-                            if (!isDisabled) {
-                              setPaymentMethod(pm.value);
-                              setClientSecret('');
-                              setCardPaid(false);
-                            }
-                          }}
+                          onClick={() => setPaymentMethod(pm.value)}
                           className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
                             paymentMethod === pm.value
                               ? 'border-gold-500 bg-gold-500/10'
                               : 'border-gray-200 dark:border-gray-700 hover:border-gold-500/50'
-                          } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                          } cursor-pointer`}
                         >
                           <div className="text-2xl mb-2">{pm.icon}</div>
                           <p className="font-semibold text-gray-900 dark:text-white text-sm">{pm.label}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            {isDisabled ? 'Not configured (add Stripe keys)' : pm.desc}
-                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{pm.desc}</p>
                         </button>
-                      );
-                    })}
+                    ))}
                   </div>
 
                   {/* ── COD Info ──────────────────────────────────────────── */}
@@ -447,45 +403,36 @@ const CheckoutPage = () => {
                     </div>
                   )}
 
-                  {/* ── Stripe Card Form ──────────────────────────────────── */}
-                  {paymentMethod === 'card' && stripeAvailable && (
-                    <div className="mt-2">
-                      {stripeLoading && (
-                        <div className="flex items-center justify-center gap-2 py-8">
-                          <svg className="w-6 h-6 animate-spin text-gold-500" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                          </svg>
-                          <span className="text-gray-500">Initializing secure payment...</span>
+                  {/* ── EasyPaisa Info ────────────────────────────────────── */}
+                  {paymentMethod === 'easypaisa' && (
+                    <div className="p-4 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700 rounded-xl">
+                      <h3 className="font-bold text-teal-800 dark:text-teal-300 mb-3 flex items-center gap-2">
+                        ⚡ EasyPaisa Payment Details
+                      </h3>
+                      <div className="space-y-2.5">
+                        {[
+                          ['EasyPaisa Number', EASYPAISA_DETAILS.number],
+                          ['IBAN', EASYPAISA_DETAILS.iban],
+                        ].map(([label, val]) => (
+                          <div key={label} className="flex flex-col sm:flex-row sm:justify-between gap-0.5">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
+                            <span className="font-mono text-sm font-semibold text-gray-900 dark:text-white select-all">{val}</span>
+                          </div>
+                        ))}
+                        <div className="pt-2 border-t border-teal-200 dark:border-teal-700">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Amount to Pay:</span>
+                            <span className="text-lg font-bold text-gold-500">{formatPrice(grandTotal)}</span>
+                          </div>
                         </div>
-                      )}
-                      {clientSecret && stripePromise && (
-                        <Elements
-                          stripe={stripePromise}
-                          options={{
-                            clientSecret,
-                            appearance: {
-                              theme: 'stripe',
-                              variables: {
-                                colorPrimary: '#C9A96E',
-                                colorBackground: '#ffffff',
-                                colorText: '#0A0F1E',
-                                borderRadius: '12px',
-                              },
-                            },
-                          }}
-                        >
-                          <StripeCardForm
-                            clientSecret={clientSecret}
-                            amount={grandTotal}
-                            onSuccess={handleStripeSuccess}
-                            onError={handleStripeError}
-                            loading={loading}
-                          />
-                        </Elements>
-                      )}
+                      </div>
+                      <p className="text-xs text-teal-700 dark:text-teal-400 mt-3 leading-relaxed">
+                        📸 {EASYPAISA_DETAILS.instructions}
+                      </p>
                     </div>
                   )}
+
+                  {/* ── Stripe Card Form — REMOVED (EasyPaisa replaces it) ─ */}
                 </div>
               </div>
 
@@ -547,31 +494,24 @@ const CheckoutPage = () => {
                     <span className="font-display text-2xl font-bold text-gold-500">{formatPrice(grandTotal)}</span>
                   </div>
 
-                  {/* Submit Button — only for COD & Bank (Stripe has its own button) */}
-                  {paymentMethod !== 'card' && (
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2"
-                    >
-                      {loading ? (
-                        <>
-                          <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                          </svg>
-                          Placing Order...
-                        </>
-                      ) : paymentMethod === 'bank' ? '🏦 Place Order (Bank Transfer)' : '🎉 Place Order'}
-                    </button>
-                  )}
-
-                  {paymentMethod === 'card' && cardPaid && (
-                    <div className="flex items-center justify-center gap-2 py-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-700">
-                      <span className="text-green-500 text-xl">✅</span>
-                      <span className="text-green-700 dark:text-green-400 font-semibold text-sm">Payment Received!</span>
-                    </div>
-                  )}
+                  {/* Submit Button — for COD, Bank & EasyPaisa */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        Placing Order...
+                      </>
+                    ) : paymentMethod === 'bank' ? '🏦 Place Order (Bank Transfer)' 
+                      : paymentMethod === 'easypaisa' ? '⚡ Place Order (EasyPaisa)'
+                      : '🎉 Place Order'}
+                  </button>
 
                   <p className="text-xs text-center text-gray-400 mt-4">🔒 Your information is 100% secure</p>
                 </div>

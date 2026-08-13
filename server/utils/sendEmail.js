@@ -7,151 +7,434 @@ const getTransporter = () => {
   const user = process.env.EMAIL_USER;
   const pass = process.env.EMAIL_PASS;
 
-  const isConfigured = host && user && pass && !user.includes('PLACEHOLDER');
+  const isConfigured =
+    host && user && pass &&
+    !user.includes('PLACEHOLDER') &&
+    !user.includes('YOUR_SENDER');
 
   if (isConfigured) {
     return nodemailer.createTransport({
       host,
       port: parseInt(port, 10),
-      secure: parseInt(port, 10) === 465, // true for 465, false for other ports
+      secure: parseInt(port, 10) === 465,
       auth: { user, pass }
     });
   }
   return null;
 };
 
-/**
- * Sends a notification email to the owner when a new order is placed
- * @param {Object} order - Order details from Mongoose
- */
-const sendOrderNotification = async (order) => {
-  const ownerEmail = 'saimlinkedin0000@gmail.com';
+// ─── Helper: send a mail ──────────────────────────────────────────────────────
+const sendMail = async ({ to, subject, html }) => {
   const transporter = getTransporter();
+  if (transporter) {
+    const mailOptions = {
+      from: `"${process.env.EMAIL_FROM || 'Royal Zone'}" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    };
+    await transporter.sendMail(mailOptions);
+    console.log(`✉️  Email sent → ${to} | Subject: ${subject}`);
+  } else {
+    console.log('\n════════════════════════════════════════════════════════════');
+    console.log('📧 SIMULATED EMAIL (Configure SMTP in server/.env to send real emails)');
+    console.log(`To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    console.log('════════════════════════════════════════════════════════════\n');
+  }
+};
 
-  // Format order items into HTML rows
-  const itemsHtml = order.items.map(item => `
+// ─── Shared HTML helpers ──────────────────────────────────────────────────────
+const emailHeader = `
+  <div style="background-color:#0A0F1E;padding:28px 25px;text-align:center;border-bottom:3px solid #C9A96E;">
+    <h1 style="margin:0;font-family:'Playfair Display',Georgia,serif;color:#fff;letter-spacing:3px;font-size:26px;">ROYAL ZONE</h1>
+    <p style="margin:6px 0 0;color:#C9A96E;font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:2px;">Luxury Lifestyle Store</p>
+  </div>
+`;
+
+const emailFooter = `
+  <div style="background-color:#f5f5f5;padding:18px;text-align:center;font-size:12px;color:#888;border-top:1px solid #eee;">
+    <p style="margin:0;">© ${new Date().getFullYear()} Royal Zone — Luxury Lifestyle. All rights reserved.</p>
+    <p style="margin:4px 0 0;">This is an automated email. Please do not reply directly.</p>
+  </div>
+`;
+
+// ─── Format items rows ────────────────────────────────────────────────────────
+const itemsTable = (items) => {
+  const rows = items.map(item => `
     <tr>
-      <td style="padding: 10px; border-bottom: 1px solid #eee;">
+      <td style="padding:10px 8px;border-bottom:1px solid #eee;font-size:13px;">
         <strong>${item.title}</strong>
-        ${item.size ? `<br><small style="color: #666;">Size: ${item.size}</small>` : ''}
+        ${item.size ? `<br><small style="color:#888;">Size: ${item.size}</small>` : ''}
       </td>
-      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">PKR ${item.price.toLocaleString()}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">PKR ${(item.price * item.quantity).toLocaleString()}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:center;font-size:13px;">${item.quantity}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:right;font-size:13px;">PKR ${(item.price * item.quantity).toLocaleString()}</td>
     </tr>
   `).join('');
 
-  // Email subject and body
-  const subject = `👑 New Order Received: ${order.orderNumber}`;
-  const htmlContent = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-      <div style="background-color: #0A0F1E; padding: 25px; text-align: center; color: white; border-bottom: 3px solid #C9A96E;">
-        <h1 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; letter-spacing: 2px;">ROYAL ZONE</h1>
-        <p style="margin: 5px 0 0 0; color: #C9A96E; font-size: 14px; font-weight: bold; text-transform: uppercase;">New Order Notification</p>
-      </div>
-      
-      <div style="padding: 25px; background-color: #fff; color: #333;">
-        <h2 style="margin-top: 0; color: #0A0F1E; border-bottom: 1px solid #eee; padding-bottom: 10px;">Order Details</h2>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+  return `
+    <table style="width:100%;border-collapse:collapse;margin-bottom:15px;font-size:13px;">
+      <thead>
+        <tr style="background:#f9f9f9;">
+          <th style="padding:8px;border-bottom:2px solid #ddd;text-align:left;">Product</th>
+          <th style="padding:8px;border-bottom:2px solid #ddd;text-align:center;">Qty</th>
+          <th style="padding:8px;border-bottom:2px solid #ddd;text-align:right;">Total</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+};
+
+// ─── Totals section ───────────────────────────────────────────────────────────
+const totalsBlock = (order) => `
+  <table style="width:100%;border-collapse:collapse;font-size:14px;border-top:2px solid #ddd;margin-top:10px;">
+    <tr>
+      <td style="padding:5px 0;color:#666;">Subtotal:</td>
+      <td style="padding:5px 0;text-align:right;">PKR ${order.subtotal.toLocaleString()}</td>
+    </tr>
+    <tr>
+      <td style="padding:5px 0;color:#666;">Shipping:</td>
+      <td style="padding:5px 0;text-align:right;">${order.shippingCost === 0 ? 'FREE' : `PKR ${order.shippingCost.toLocaleString()}`}</td>
+    </tr>
+    <tr>
+      <td style="padding:5px 0;color:#666;">Tax (17% GST):</td>
+      <td style="padding:5px 0;text-align:right;">PKR ${order.tax.toLocaleString()}</td>
+    </tr>
+    <tr style="font-size:17px;font-weight:bold;color:#C9A96E;">
+      <td style="padding:10px 0 5px;">Grand Total:</td>
+      <td style="padding:10px 0 5px;text-align:right;">PKR ${order.total.toLocaleString()}</td>
+    </tr>
+  </table>
+`;
+
+// ─── Payment method badge ─────────────────────────────────────────────────────
+const paymentBadge = (method) => {
+  const badges = {
+    cod: { label: 'Cash on Delivery', color: '#2e7d32', bg: '#e8f5e9' },
+    bank: { label: 'Bank Transfer', color: '#1565c0', bg: '#e3f2fd' },
+    easypaisa: { label: 'EasyPaisa', color: '#00796b', bg: '#e0f2f1' },
+    card: { label: 'Card Payment', color: '#6a1b9a', bg: '#f3e5f5' },
+  };
+  const b = badges[method] || { label: method, color: '#333', bg: '#eee' };
+  return `<span style="display:inline-block;padding:4px 14px;background:${b.bg};color:${b.color};border-radius:20px;font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">${b.label}</span>`;
+};
+
+// ─── Shipping address block ───────────────────────────────────────────────────
+const addressBlock = (addr) => `
+  <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;line-height:1.7;">
+    <strong style="font-size:14px;">${addr.name}</strong><br>
+    ${addr.street}<br>
+    ${addr.city}, ${addr.state} ${addr.zipCode || ''}<br>
+    ${addr.country}<br>
+    📞 ${addr.phone}
+  </div>
+`;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  1. OWNER NOTIFICATION EMAIL (sent on every new order)
+//     Includes a 1-click "Verify Payment" button for easypaisa/bank
+// ═══════════════════════════════════════════════════════════════════════════════
+const sendOrderNotification = async (order, verifyToken = null) => {
+  const ownerEmail = 'saimlinkedin0000@gmail.com';
+  const serverUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`;
+
+  const isManualPayment = ['easypaisa', 'bank'].includes(order.paymentMethod);
+  const verifyLink = verifyToken
+    ? `${serverUrl}/api/orders/verify-payment/${verifyToken}`
+    : null;
+
+  const subject = `👑 New Order — ${order.orderNumber} | ${order.paymentMethod.toUpperCase()}`;
+
+  const verifyButtonHtml = isManualPayment && verifyLink ? `
+    <div style="margin:25px 0;text-align:center;background:#f0fff4;border:2px dashed #C9A96E;border-radius:10px;padding:20px;">
+      <p style="font-size:14px;color:#333;margin:0 0 14px;font-weight:bold;">
+        ${order.paymentMethod === 'easypaisa' ? '⚡ Customer selected EasyPaisa payment' : '🏦 Customer selected Bank Transfer'}
+      </p>
+      <p style="font-size:12px;color:#666;margin:0 0 16px;">
+        Once you confirm you have received the payment, click the button below:
+      </p>
+      <a href="${verifyLink}"
+         style="display:inline-block;background:linear-gradient(135deg,#C9A96E,#a07840);color:#fff;padding:16px 40px;border-radius:8px;font-weight:bold;text-decoration:none;font-size:15px;letter-spacing:1px;box-shadow:0 4px 12px rgba(201,169,110,0.4);">
+        ✅ VERIFY PAYMENT — Mark as PAID
+      </a>
+      <p style="font-size:11px;color:#aaa;margin:12px 0 0;">
+        This will mark the payment as verified and automatically send the customer a confirmation email.
+      </p>
+    </div>
+  ` : '';
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;border:1px solid #ddd;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+      ${emailHeader}
+
+      <div style="padding:28px 25px;background:#fff;color:#333;">
+        <h2 style="margin-top:0;color:#0A0F1E;border-bottom:2px solid #C9A96E;padding-bottom:10px;font-size:20px;">
+          📋 New Order Received
+        </h2>
+
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px;">
           <tr>
-            <td style="padding: 5px 0; color: #666;">Order Number:</td>
-            <td style="padding: 5px 0; font-weight: bold; text-align: right; color: #C9A96E;">${order.orderNumber}</td>
+            <td style="padding:6px 0;color:#666;width:45%;">Order Number:</td>
+            <td style="padding:6px 0;font-weight:bold;color:#C9A96E;font-size:16px;">${order.orderNumber}</td>
           </tr>
           <tr>
-            <td style="padding: 5px 0; color: #666;">Payment Method:</td>
-            <td style="padding: 5px 0; font-weight: bold; text-align: right; text-transform: uppercase;">${order.paymentMethod}</td>
+            <td style="padding:6px 0;color:#666;">Date:</td>
+            <td style="padding:6px 0;">${new Date(order.createdAt).toLocaleString('en-PK')}</td>
           </tr>
           <tr>
-            <td style="padding: 5px 0; color: #666;">Payment Status:</td>
-            <td style="padding: 5px 0; font-weight: bold; text-align: right; text-transform: uppercase; color: ${order.paymentStatus === 'paid' ? '#2e7d32' : '#e65100'};">${order.paymentStatus}</td>
+            <td style="padding:6px 0;color:#666;">Payment Method:</td>
+            <td style="padding:6px 0;">${paymentBadge(order.paymentMethod)}</td>
           </tr>
           <tr>
-            <td style="padding: 5px 0; color: #666;">Date:</td>
-            <td style="padding: 5px 0; text-align: right;">${new Date(order.createdAt).toLocaleString()}</td>
+            <td style="padding:6px 0;color:#666;">Payment Status:</td>
+            <td style="padding:6px 0;font-weight:bold;color:${order.paymentStatus === 'paid' || order.paymentStatus === 'verified' ? '#2e7d32' : '#e65100'};">
+              ${order.paymentStatus.toUpperCase()}
+            </td>
           </tr>
+          ${order.customerEmail ? `
+          <tr>
+            <td style="padding:6px 0;color:#666;">Customer Email:</td>
+            <td style="padding:6px 0;">${order.customerEmail}</td>
+          </tr>` : ''}
         </table>
 
-        <h3 style="color: #0A0F1E; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-top: 25px;">Shipping Address</h3>
-        <p style="margin: 5px 0; line-height: 1.5;">
-          <strong>Name:</strong> ${order.shippingAddress.name}<br>
-          <strong>Street:</strong> ${order.shippingAddress.street}<br>
-          <strong>City:</strong> ${order.shippingAddress.city}, ${order.shippingAddress.state}<br>
-          <strong>Phone:</strong> ${order.shippingAddress.phone}
-        </p>
+        ${verifyButtonHtml}
 
-        <h3 style="color: #0A0F1E; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-top: 25px;">Items Summary</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
-          <thead>
-            <tr style="background-color: #f9f9f9;">
-              <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: left;">Product</th>
-              <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center;">Qty</th>
-              <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: right;">Price</th>
-              <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: right;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
-        </table>
+        <h3 style="color:#0A0F1E;margin-bottom:10px;font-size:15px;">📦 Shipping Address</h3>
+        ${addressBlock(order.shippingAddress)}
 
-        <table style="width: 100%; margin-top: 15px; font-size: 15px; border-top: 2px solid #ddd; padding-top: 10px;">
-          <tr>
-            <td style="padding: 5px 0; color: #666;">Subtotal:</td>
-            <td style="padding: 5px 0; text-align: right;">PKR ${order.subtotal.toLocaleString()}</td>
-          </tr>
-          <tr>
-            <td style="padding: 5px 0; color: #666;">Shipping Cost:</td>
-            <td style="padding: 5px 0; text-align: right;">PKR ${order.shippingCost.toLocaleString()}</td>
-          </tr>
-          <tr>
-            <td style="padding: 5px 0; color: #666;">Tax (17% GST):</td>
-            <td style="padding: 5px 0; text-align: right;">PKR ${order.tax.toLocaleString()}</td>
-          </tr>
-          <tr style="font-size: 18px; font-weight: bold; color: #C9A96E;">
-            <td style="padding: 10px 0 5px 0;">Grand Total:</td>
-            <td style="padding: 10px 0 5px 0; text-align: right;">PKR ${order.total.toLocaleString()}</td>
-          </tr>
-        </table>
-        
+        <h3 style="color:#0A0F1E;margin-bottom:10px;font-size:15px;">🛍️ Ordered Items</h3>
+        ${itemsTable(order.items)}
+        ${totalsBlock(order)}
+
         ${order.notes ? `
-          <div style="margin-top: 20px; padding: 10px; background-color: #fff9c4; border-left: 4px solid #fbc02d; border-radius: 4px; font-size: 13px;">
-            <strong>Order Notes:</strong> ${order.notes}
-          </div>
-        ` : ''}
+        <div style="margin-top:20px;padding:12px 16px;background:#fff9c4;border-left:4px solid #fbc02d;border-radius:4px;font-size:13px;">
+          <strong>📝 Customer Notes:</strong> ${order.notes}
+        </div>` : ''}
       </div>
 
-      <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee;">
-        This is an automated notification from your Royal Zone dashboard.
-      </div>
+      ${emailFooter}
     </div>
   `;
 
-  if (transporter) {
-    try {
-      const mailOptions = {
-        from: `"${process.env.EMAIL_FROM || 'Royal Zone Notifications'}" <${process.env.EMAIL_USER}>`,
-        to: ownerEmail,
-        subject,
-        html: htmlContent
-      };
-      await transporter.sendMail(mailOptions);
-      console.log(`✉️ Order notification email sent successfully to ${ownerEmail}`);
-    } catch (err) {
-      console.error('❌ Failed to send order notification email:', err.message);
-    }
-  } else {
-    // Falls back to logging to console in development/no credentials mode
-    console.log('\n============================================================');
-    console.log('✉️  SIMULATED EMAIL NOTIFICATION (No SMTP Configured in server/.env)');
-    console.log(`To: ${ownerEmail}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Customer: ${order.shippingAddress.name} (${order.shippingAddress.phone})`);
-    console.log(`Items: ${order.items.length} product(s)`);
-    console.log(`Grand Total: PKR ${order.total.toLocaleString()}`);
-    console.log('============================================================\n');
+  try {
+    await sendMail({ to: ownerEmail, subject, html });
+  } catch (err) {
+    console.error('❌ Owner notification email failed:', err.message);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  2. CUSTOMER — PAYMENT PENDING EMAIL
+//     Sent when customer places easypaisa/bank order
+// ═══════════════════════════════════════════════════════════════════════════════
+const sendCustomerPendingEmail = async (order, customerEmail) => {
+  if (!customerEmail) return;
+
+  const isPaisa = order.paymentMethod === 'easypaisa';
+  const isBank = order.paymentMethod === 'bank';
+
+  const paymentInstructions = isPaisa ? `
+    <div style="background:#e0f2f1;border-left:4px solid #00796b;border-radius:6px;padding:16px 18px;margin:20px 0;font-size:13px;line-height:1.9;">
+      <p style="margin:0 0 10px;font-weight:bold;color:#00796b;font-size:14px;">⚡ EasyPaisa Payment Details</p>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:3px 0;color:#555;width:45%;">📱 EasyPaisa Number:</td><td style="font-weight:bold;color:#00695c;">03323783711</td></tr>
+        <tr><td style="padding:3px 0;color:#555;">🏦 IBAN:</td><td style="font-weight:bold;color:#00695c;font-size:12px;">PK39TMFB0000000042714749</td></tr>
+        <tr><td style="padding:3px 0;color:#555;">💰 Amount:</td><td style="font-weight:bold;color:#C9A96E;font-size:15px;">PKR ${order.total.toLocaleString()}</td></tr>
+      </table>
+      <p style="margin:12px 0 0;color:#555;font-size:12px;">
+        📸 After payment, send your <strong>transaction screenshot</strong> via WhatsApp to confirm your order.
+      </p>
+    </div>
+  ` : isBank ? `
+    <div style="background:#e3f2fd;border-left:4px solid #1565c0;border-radius:6px;padding:16px 18px;margin:20px 0;font-size:13px;line-height:1.9;">
+      <p style="margin:0 0 10px;font-weight:bold;color:#1565c0;font-size:14px;">🏦 Bank Transfer Details</p>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:3px 0;color:#555;width:45%;">🏛️ Bank:</td><td style="font-weight:bold;">Bank AL Habib Limited</td></tr>
+        <tr><td style="padding:3px 0;color:#555;">👤 Account Title:</td><td style="font-weight:bold;">AFAQ HAMZA</td></tr>
+        <tr><td style="padding:3px 0;color:#555;">🔢 Account #:</td><td style="font-weight:bold;">01600981006190016</td></tr>
+        <tr><td style="padding:3px 0;color:#555;">💳 IBAN:</td><td style="font-weight:bold;font-size:12px;">PK69BAHL0160098100619001</td></tr>
+        <tr><td style="padding:3px 0;color:#555;">💰 Amount:</td><td style="font-weight:bold;color:#C9A96E;font-size:15px;">PKR ${order.total.toLocaleString()}</td></tr>
+      </table>
+      <p style="margin:12px 0 0;color:#555;font-size:12px;">
+        📸 After transfer, send your <strong>payment receipt</strong> to our WhatsApp: <strong>+92-336-7947525</strong>
+      </p>
+    </div>
+  ` : '';
+
+  const subject = `⏳ Order #${order.orderNumber} Placed — Payment Pending | Royal Zone`;
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #ddd;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+      ${emailHeader}
+
+      <div style="padding:28px 25px;background:#fff;color:#333;">
+        <h2 style="margin-top:0;color:#0A0F1E;font-size:20px;">Order Received — Awaiting Payment Verification</h2>
+        <p style="color:#555;font-size:14px;line-height:1.7;">
+          Dear <strong>${order.shippingAddress.name}</strong>,<br><br>
+          Thank you for shopping at <strong>Royal Zone</strong>! Your order 
+          <strong style="color:#C9A96E;">#${order.orderNumber}</strong> has been received.
+          Please complete your payment and we will verify it shortly.
+        </p>
+
+        <div style="text-align:center;margin:20px 0;">
+          <span style="display:inline-block;background:#fff3e0;color:#e65100;padding:10px 28px;border-radius:25px;font-weight:bold;font-size:14px;border:2px solid #ffb74d;">
+            ⏳ PAYMENT PENDING VERIFICATION
+          </span>
+        </div>
+
+        ${paymentInstructions}
+
+        <h3 style="color:#0A0F1E;margin-bottom:10px;font-size:15px;border-top:1px solid #eee;padding-top:20px;">🛍️ Your Order</h3>
+        ${itemsTable(order.items)}
+        ${totalsBlock(order)}
+
+        <h3 style="color:#0A0F1E;margin:20px 0 10px;font-size:15px;">📦 Delivery Address</h3>
+        ${addressBlock(order.shippingAddress)}
+
+        <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;font-size:13px;color:#555;line-height:1.7;margin-top:10px;">
+          <strong>⏱️ What happens next?</strong><br>
+          1. Complete your payment using the details above<br>
+          2. Our team will verify your payment (usually within a few hours)<br>
+          3. You will receive a <strong>Payment Confirmed</strong> email once verified<br>
+          4. Your order will be dispatched within 1–2 business days
+        </div>
+      </div>
+
+      ${emailFooter}
+    </div>
+  `;
+
+  try {
+    await sendMail({ to: customerEmail, subject, html });
+  } catch (err) {
+    console.error('❌ Customer pending email failed:', err.message);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  3. CUSTOMER — PAYMENT VERIFIED EMAIL
+//     Sent when owner clicks "Verify Payment" link in their email
+// ═══════════════════════════════════════════════════════════════════════════════
+const sendCustomerPaymentVerifiedEmail = async (order) => {
+  const customerEmail = order.customerEmail;
+  if (!customerEmail) return;
+
+  const subject = `✅ Payment Verified — Order #${order.orderNumber} is Confirmed! | Royal Zone`;
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #ddd;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+      ${emailHeader}
+
+      <div style="padding:28px 25px;background:#fff;color:#333;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="font-size:64px;line-height:1;">🎉</div>
+          <h2 style="margin:12px 0 6px;color:#0A0F1E;font-size:22px;">Payment Verified!</h2>
+          <p style="color:#555;font-size:14px;margin:0;">Your order is confirmed and being processed.</p>
+        </div>
+
+        <div style="text-align:center;margin:0 0 24px;">
+          <span style="display:inline-block;background:#e8f5e9;color:#2e7d32;padding:10px 28px;border-radius:25px;font-weight:bold;font-size:14px;border:2px solid #a5d6a7;">
+            ✅ PAYMENT VERIFIED — ORDER CONFIRMED
+          </span>
+        </div>
+
+        <p style="color:#555;font-size:14px;line-height:1.7;">
+          Dear <strong>${order.shippingAddress.name}</strong>,<br><br>
+          We have successfully verified your payment for order 
+          <strong style="color:#C9A96E;">#${order.orderNumber}</strong>. 
+          Your order is now being prepared for dispatch. 
+          Expect delivery within <strong>3–5 working days</strong>.
+        </p>
+
+        <div style="background:#C9A96E15;border:1px solid #C9A96E50;border-radius:10px;padding:18px;text-align:center;margin:20px 0;">
+          <p style="margin:0 0 6px;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Order Number</p>
+          <p style="margin:0;color:#C9A96E;font-size:24px;font-weight:bold;font-family:'Playfair Display',Georgia,serif;">${order.orderNumber}</p>
+          <p style="margin:8px 0 0;color:#555;font-size:13px;">Total Paid: <strong>PKR ${order.total.toLocaleString()}</strong></p>
+        </div>
+
+        <h3 style="color:#0A0F1E;margin-bottom:10px;font-size:15px;">🛍️ Order Summary</h3>
+        ${itemsTable(order.items)}
+        ${totalsBlock(order)}
+
+        <h3 style="color:#0A0F1E;margin:20px 0 10px;font-size:15px;">📦 Delivery Address</h3>
+        ${addressBlock(order.shippingAddress)}
+
+        <div style="background:#f9f9f9;border-radius:8px;padding:14px 16px;font-size:13px;color:#555;line-height:1.7;margin-top:10px;">
+          <strong>📞 Need Help?</strong><br>
+          WhatsApp us at <strong>+92-336-7947525</strong> with your order number for any queries.
+        </div>
+      </div>
+
+      ${emailFooter}
+    </div>
+  `;
+
+  try {
+    await sendMail({ to: customerEmail, subject, html });
+  } catch (err) {
+    console.error('❌ Customer verified email failed:', err.message);
+  }
+};
+
+// ─── 4. COD Order Confirmation ────────────────────────────────────────────────
+const sendCustomerCODEmail = async (order) => {
+  const customerEmail = order.customerEmail;
+  if (!customerEmail) return;
+
+  const subject = `🎉 Order Confirmed — #${order.orderNumber} | Royal Zone`;
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #ddd;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+      ${emailHeader}
+      <div style="padding:28px 25px;background:#fff;color:#333;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="font-size:64px;line-height:1;">📦</div>
+          <h2 style="margin:12px 0 6px;color:#0A0F1E;font-size:22px;">Order Confirmed!</h2>
+          <p style="color:#555;font-size:14px;margin:0;">Your order has been placed successfully.</p>
+        </div>
+
+        <div style="text-align:center;margin:0 0 24px;">
+          <span style="display:inline-block;background:#e8f5e9;color:#2e7d32;padding:10px 28px;border-radius:25px;font-weight:bold;font-size:14px;border:2px solid #a5d6a7;">
+            ✅ ORDER CONFIRMED — CASH ON DELIVERY
+          </span>
+        </div>
+
+        <p style="color:#555;font-size:14px;line-height:1.7;">
+          Dear <strong>${order.shippingAddress.name}</strong>,<br><br>
+          Your order <strong style="color:#C9A96E;">#${order.orderNumber}</strong> has been confirmed. 
+          Please keep <strong>PKR ${order.total.toLocaleString()}</strong> ready at time of delivery.
+          Expected delivery: <strong>3–5 working days</strong>.
+        </p>
+
+        <div style="background:#C9A96E15;border:1px solid #C9A96E50;border-radius:10px;padding:18px;text-align:center;margin:20px 0;">
+          <p style="margin:0 0 6px;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Order Number</p>
+          <p style="margin:0;color:#C9A96E;font-size:24px;font-weight:bold;">${order.orderNumber}</p>
+          <p style="margin:8px 0 0;color:#555;font-size:13px;">Amount to Pay on Delivery: <strong>PKR ${order.total.toLocaleString()}</strong></p>
+        </div>
+
+        <h3 style="color:#0A0F1E;margin-bottom:10px;font-size:15px;">🛍️ Order Summary</h3>
+        ${itemsTable(order.items)}
+        ${totalsBlock(order)}
+
+        <h3 style="color:#0A0F1E;margin:20px 0 10px;font-size:15px;">📦 Delivery Address</h3>
+        ${addressBlock(order.shippingAddress)}
+      </div>
+      ${emailFooter}
+    </div>
+  `;
+
+  try {
+    await sendMail({ to: customerEmail, subject, html });
+  } catch (err) {
+    console.error('❌ Customer COD email failed:', err.message);
   }
 };
 
 module.exports = {
-  sendOrderNotification
+  sendOrderNotification,
+  sendCustomerPendingEmail,
+  sendCustomerPaymentVerifiedEmail,
+  sendCustomerCODEmail,
 };

@@ -34,11 +34,18 @@ const orderSchema = new mongoose.Schema({
   paymentMethod: {
     type: String,
     required: true,
-    enum: ['cod', 'card', 'bank']
+    enum: ['cod', 'card', 'bank', 'easypaisa']
+  },
+  paymentVerifyToken: {
+    type: String,
+    select: false  // Don't expose token in normal queries
+  },
+  customerEmail: {
+    type: String
   },
   paymentStatus: {
     type: String,
-    enum: ['pending', 'paid'],
+    enum: ['pending', 'paid', 'verified'],
     default: 'pending'
   },
   orderStatus: {

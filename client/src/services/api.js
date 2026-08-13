@@ -12,7 +12,8 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = storage.get('rz_token');
-    if (token) {
+    // Only send REAL JWT tokens — demo tokens are client-only and will fail server auth
+    if (token && token !== 'null' && token !== 'undefined' && !token.startsWith('demo_token_')) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -26,13 +27,9 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const url = error.config?.url || '';
-      // Only redirect to login for truly protected routes
-      // Do NOT redirect for cart/wishlist/product API failures
-      const shouldRedirect = (
-        url.includes('/orders') ||
-        url.includes('/auth/me') ||
-        url.includes('/dashboard')
-      ) && !url.includes('/orders/stripe-config');
+      // ONLY logout user if token is truly invalid (auth/me fails)
+      // Do NOT logout for order, cart, or other API failures
+      const shouldRedirect = url.includes('/auth/me');
 
       if (shouldRedirect) {
         storage.remove('rz_token');
