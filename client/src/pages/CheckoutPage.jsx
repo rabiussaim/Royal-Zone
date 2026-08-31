@@ -157,7 +157,13 @@ const CheckoutPage = () => {
 
       const order = data.order || data.data || data;
       await clearCart();
-      setOrderSuccess(order);
+      toast('Order placed successfully! Redirecting to invoice...', 'success');
+      const targetId = order._id || order.orderNumber;
+      if (targetId) {
+        navigate(`/order-success/${targetId}`);
+      } else {
+        setOrderSuccess(order);
+      }
     } catch (err) {
       const status = err?.response?.status;
       const msg = err?.response?.data?.message || err?.message || 'Order failed. Please try again.';
@@ -269,11 +275,14 @@ const CheckoutPage = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <Link to="/orders" className="w-full sm:flex-1 btn-primary py-3 text-center">
+            <Link to={`/order-success/${orderSuccess._id || orderSuccess.orderNumber}`} className="w-full sm:flex-1 btn-primary py-3 text-center font-bold">
+              📄 View Official Invoice
+            </Link>
+            <Link to="/orders" className="w-full sm:flex-1 btn-secondary py-3 text-center">
               Track Order
             </Link>
-            <Link to="/" className="w-full sm:flex-1 btn-secondary py-3 text-center">
-              Continue Shopping
+            <Link to="/" className="w-full sm:flex-1 border border-gray-300 py-3 text-center rounded-xl text-gray-700 dark:text-gray-300">
+              Shop More
             </Link>
           </div>
         </div>

@@ -387,7 +387,29 @@ body {
    Print styles
    ============================================= */
 @media print {
-  .navbar, .footer, .btn-primary, .btn-secondary { display: none !important; }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  header, footer, nav, .no-print, button, .navbar-glass, .announcement-bar, [aria-label="Site announcement"] {
+    display: none !important;
+  }
+  .printable-invoice {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .printable-invoice * {
+    color: #000000 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
 }
 
 /* =============================================

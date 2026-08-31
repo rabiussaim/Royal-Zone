@@ -19,15 +19,27 @@ export const orderService = {
     return res.data;
   },
 
-  // Get all user orders
+  // Get logged-in user's orders
   getUserOrders: async (params = {}) => {
     const res = await api.get('/orders', { params });
     return res.data;
   },
 
-  // Get single order
+  // Get all orders (Admin only)
+  getAllOrders: async (params = {}) => {
+    const res = await api.get('/orders/admin/all', { params });
+    return res.data;
+  },
+
+  // Get single order by ID or orderNumber
   getOrderById: async (id) => {
     const res = await api.get(`/orders/${id}`);
+    return res.data;
+  },
+
+  // Update order status or payment status (Admin only)
+  updateOrderStatus: async (id, statusData) => {
+    const res = await api.put(`/orders/${id}/status`, statusData);
     return res.data;
   },
 
@@ -37,3 +49,4 @@ export const orderService = {
     return res.data;
   },
 };
+

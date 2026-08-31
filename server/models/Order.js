@@ -50,12 +50,13 @@ const orderSchema = new mongoose.Schema({
   },
   orderStatus: {
     type: String,
-    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+    enum: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'],
     default: 'pending'
   },
   subtotal: { type: Number, required: true },
   shippingCost: { type: Number, required: true },
   tax: { type: Number, required: true },
+  discount: { type: Number, default: 0 },
   total: { type: Number, required: true },
   notes: { type: String },
   stripePaymentIntentId: { type: String },

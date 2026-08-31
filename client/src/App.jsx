@@ -26,6 +26,7 @@ import AddProductPage from './pages/AddProductPage';
 import OwnerDashboardPage from './pages/OwnerDashboardPage';
 import BlogPage from './pages/BlogPage';
 import BlogDetailPage from './pages/BlogDetailPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ScrollToTop from './components/common/ScrollToTop';
 
@@ -52,6 +53,9 @@ const App = () => {
                   <Route path="/blog/:slug" element={<MainLayout><BlogDetailPage /></MainLayout>} />
                   <Route path="/cart" element={<MainLayout><CartPage /></MainLayout>} />
                   <Route path="/checkout" element={<MainLayout><CheckoutPage /></MainLayout>} />
+                  <Route path="/order-success/:id" element={<MainLayout><OrderSuccessPage /></MainLayout>} />
+                  <Route path="/order/:id" element={<MainLayout><OrderSuccessPage /></MainLayout>} />
+                  <Route path="/invoice/:id" element={<MainLayout><OrderSuccessPage /></MainLayout>} />
                   <Route path="/orders" element={<MainLayout><OrdersPage /></MainLayout>} />
                   <Route path="/dashboard" element={<MainLayout><DashboardPage /></MainLayout>} />
                   <Route path="/owner-dashboard" element={<MainLayout><OwnerDashboardPage /></MainLayout>} />

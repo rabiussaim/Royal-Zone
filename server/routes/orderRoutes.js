@@ -2,6 +2,7 @@ const express = require('express');
 const {
   createOrder,
   getUserOrders,
+  getAllOrders,
   getOrderById,
   cancelOrder,
   updateOrderStatus,
@@ -14,13 +15,15 @@ const { protect, adminOnly } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 // ── Public: Owner clicks "Verify Payment" link from email ─────────────────────
-// No auth required — token-based security
 router.get('/verify-payment/:token', verifyPaymentByToken);
 
-// ── Public: Stripe publishable key config ─────────────────────────────────────
+// ── Protected: Stripe publishable key config ──────────────────────────────────
 router.get('/stripe-config', protect, getStripeConfig);
 
 router.use(protect);
+
+// Admin: Get all customer orders with filtering/search
+router.get('/admin/all', adminOnly, getAllOrders);
 
 // Create Stripe Payment Intent
 router.post('/create-payment-intent', createPaymentIntent);
@@ -35,5 +38,7 @@ router.route('/:id')
 
 router.put('/:id/cancel', cancelOrder);
 router.put('/:id/status', adminOnly, updateOrderStatus);
+router.patch('/:id/status', adminOnly, updateOrderStatus);
 
 module.exports = router;
+
