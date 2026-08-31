@@ -102,9 +102,10 @@ export const AuthProvider = ({ children }) => {
     return data;
   }, [user]);
 
-  // STRICT PERMISSION CHECK:
-  // ONLY user with email saimlinkedin0000@gmail.com is owner
+  // Check if real user (not guest)
   const isOwner = user?.email?.toLowerCase().trim() === OWNER_EMAIL;
+  const isGuest = !user || (user._id && String(user._id).startsWith('guest_'));
+  const isLoggedIn = !isGuest && !!storage.get('rz_token');
 
   return (
     <AuthContext.Provider value={{
@@ -114,7 +115,8 @@ export const AuthProvider = ({ children }) => {
       logout,
       register,
       updateProfile,
-      isLoggedIn: !!user,
+      isLoggedIn,
+      isGuest,
       isOwner,
       ownerEmail: OWNER_EMAIL,
     }}>

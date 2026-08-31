@@ -105,8 +105,12 @@ const LoginPage = () => {
     }
   };
 
-  const handleGoogleError = () => {
-    toast('Google sign-in was cancelled or failed. Please try again.', 'error');
+  const [googleOriginError, setGoogleOriginError] = useState(false);
+
+  const handleGoogleError = (error) => {
+    console.error('Google OAuth Error:', error);
+    setGoogleOriginError(true);
+    toast('Google Sign-In origin mismatch (400). Please add http://localhost:5173 to Google Cloud Console JavaScript origins.', 'error');
   };
 
   const googleConfigured = GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE');
@@ -146,6 +150,16 @@ const LoginPage = () => {
                   Signing in with Google...
                 </p>
               )}
+              {googleOriginError && (
+                <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-left text-xs text-amber-300">
+                  <p className="font-bold flex items-center gap-1.5 mb-1">
+                    ⚠️ Google OAuth Error: origin_mismatch (400)
+                  </p>
+                  <p className="text-gray-300 text-[11px] leading-relaxed">
+                    To fix this, go to Google Cloud Console → Credentials → Edit your Web Client ID → Add <strong className="text-gold-400 font-mono">http://localhost:5173</strong> under <em>Authorized JavaScript origins</em>.
+                  </p>
+                </div>
+              )}
             </GoogleOAuthProvider>
           ) : (
             // Placeholder button when Google Client ID not set
@@ -162,6 +176,8 @@ const LoginPage = () => {
             </div>
           )}
         </div>
+
+
 
         {/* Divider */}
         <div className="relative flex items-center gap-3 mb-6">
