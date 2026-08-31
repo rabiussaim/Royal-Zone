@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ProductGrid from '../components/product/ProductGrid';
 import SectionTitle from '../components/ui/SectionTitle';
 import { formatPrice } from '../utils/helpers';
+import DemoSectionNotice from '../components/common/DemoSectionNotice';
 
 const ALL_BEDSHEETS = [
   { _id: '65a100000000000000000001', title: 'Royal Cotton 1000TC', category: { name: 'Bedsheet' }, price: 12500, oldPrice: 15000, discount: 17, rating: 4.9, reviewCount: 89, images: ['https://picsum.photos/seed/bed1/600/700'], stock: 8, sizes: ['Single', 'Double', 'Queen', 'King'], description: '1000 thread count pure Egyptian cotton. Unmatched softness and durability.', bestSeller: true },
@@ -111,6 +112,8 @@ const BedsheetsPage = () => {
         </div>
 
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{filtered.length} bedsheet set{filtered.length !== 1 ? 's' : ''} found</p>
+        {/* Demo notice — remove via IS_DEMO_MODE toggle in storeConfig.js */}
+        <DemoSectionNotice />
         <ProductGrid products={filtered} emptyMessage="No bedsheets match your filters. Try adjusting the criteria." />
       </div>
     </div>

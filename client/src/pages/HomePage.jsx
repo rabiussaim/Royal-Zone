@@ -5,6 +5,7 @@ import SectionTitle from '../components/ui/SectionTitle';
 import ProductGrid from '../components/product/ProductGrid';
 import BlogCard from '../components/blog/BlogCard';
 import SEO from '../components/common/SEO';
+import DemoSectionNotice from '../components/common/DemoSectionNotice';
 import { BLOG_POSTS } from '../data/blogData';
 import useScrollReveal from '../hooks/useScrollReveal';
 
@@ -101,6 +102,8 @@ const HomePage = () => {
             <SectionTitle title="Featured Products" subtitle="Handpicked luxury pieces curated just for you" />
           </RevealSection>
           <RevealSection>
+            {/* Demo notice — remove via IS_DEMO_MODE toggle in storeConfig.js */}
+            <DemoSectionNotice />
             <ProductGrid products={DUMMY_FEATURED} />
           </RevealSection>
           <div className="text-center mt-10">
@@ -174,6 +177,8 @@ const HomePage = () => {
             <SectionTitle title="Best Sellers" subtitle="Our most loved products — trusted by thousands" />
           </RevealSection>
           <RevealSection>
+            {/* Demo notice — remove via IS_DEMO_MODE toggle in storeConfig.js */}
+            <DemoSectionNotice />
             <ProductGrid products={DUMMY_BESTSELLERS} />
           </RevealSection>
         </div>
@@ -186,6 +191,8 @@ const HomePage = () => {
             <SectionTitle title="Luxury Collection" subtitle="Reserved for those who appreciate the finest things in life" light />
           </RevealSection>
           <RevealSection>
+            {/* Demo notice — remove via IS_DEMO_MODE toggle in storeConfig.js */}
+            <DemoSectionNotice />
             <ProductGrid products={DUMMY_LUXURY} />
           </RevealSection>
         </div>

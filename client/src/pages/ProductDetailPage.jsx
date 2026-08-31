@@ -6,6 +6,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../components/common/Toast';
 import { formatPrice, calculateDiscount } from '../utils/helpers';
 import ProductGrid from '../components/product/ProductGrid';
+import { STORE_CONFIG } from '../config/storeConfig';
 
 // Combined product data for lookup
 const ALL_PRODUCTS = [
@@ -109,7 +110,22 @@ const ProductDetailPage = () => {
           {/* Product Info */}
           <div className="flex flex-col gap-5">
             <div>
-              <p className="text-gold-500 text-sm font-medium uppercase tracking-widest mb-2">{product.category?.name}</p>
+              <div className="flex items-center gap-2.5 mb-2 flex-wrap">
+                <p className="text-gold-500 text-sm font-medium uppercase tracking-widest">{product.category?.name}</p>
+                {/* Demo badge — hidden when IS_DEMO_MODE is false */}
+                {STORE_CONFIG.IS_DEMO_MODE && (
+                  <span
+                    className="inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-md"
+                    style={{
+                      background: 'rgba(201,169,110,0.10)',
+                      border: '1px solid rgba(201,169,110,0.28)',
+                      color: '#C9A96E',
+                    }}
+                  >
+                    Demo Product
+                  </span>
+                )}
+              </div>
               <h1 className="font-display text-3xl md:text-4xl font-bold text-gray-900 dark:text-white leading-tight mb-4">{product.title}</h1>
               <StarRating rating={product.rating} count={product.reviewCount} size="md" />
             </div>

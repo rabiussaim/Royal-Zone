@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ProductGrid from '../components/product/ProductGrid';
 import SectionTitle from '../components/ui/SectionTitle';
 import { formatPrice } from '../utils/helpers';
+import DemoSectionNotice from '../components/common/DemoSectionNotice';
 
 // Dummy perfume products — replace with API call later
 const ALL_PERFUMES = [
@@ -134,6 +135,9 @@ const PerfumesPage = () => {
 
         {/* Results count */}
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{filtered.length} perfume{filtered.length !== 1 ? 's' : ''} found</p>
+
+        {/* Demo notice — remove via IS_DEMO_MODE toggle in storeConfig.js */}
+        <DemoSectionNotice />
 
         {/* Products Grid */}
         <ProductGrid products={filtered} emptyMessage="No perfumes match your filters. Try adjusting the criteria." />

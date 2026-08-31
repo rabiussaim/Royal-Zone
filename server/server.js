@@ -21,12 +21,23 @@ connectDB();
 
 const app = express();
 
+// Disable ETag caching for dynamic API responses
+app.set('etag', false);
+
 // Body parser
 app.use(express.json());
 
 // Security middleware
 app.use(helmet());
 app.use(cors());
+
+// Prevent HTTP 304 caching on API routes
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
 
 // Logging
 if (process.env.NODE_ENV === 'development') {

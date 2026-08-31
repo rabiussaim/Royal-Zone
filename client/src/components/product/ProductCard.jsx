@@ -8,6 +8,7 @@ import StarRating from '../common/StarRating';
 import EditProductModal from './EditProductModal';
 import { formatPrice, calculateDiscount } from '../../utils/helpers';
 import { productService } from '../../services/productService';
+import { STORE_CONFIG } from '../../config/storeConfig';
 
 const ProductCard = ({ product: initialProduct, onQuickView, onDelete }) => {
   const { addToCart } = useCart();
@@ -130,6 +131,22 @@ const ProductCard = ({ product: initialProduct, onQuickView, onDelete }) => {
             {product.stock === 0 && (
               <div className="absolute inset-0 bg-navy-900/60 flex items-center justify-center z-20">
                 <span className="px-4 py-1.5 bg-red-500 text-white text-sm font-bold rounded-full">Out of Stock</span>
+              </div>
+            )}
+
+            {/* Demo Product badge — hidden when IS_DEMO_MODE is false */}
+            {STORE_CONFIG.IS_DEMO_MODE && (
+              <div
+                className="absolute bottom-2.5 left-2.5 z-10 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest"
+                style={{
+                  background: 'rgba(10,15,30,0.75)',
+                  border: '1px solid rgba(201,169,110,0.35)',
+                  color: 'rgba(201,169,110,0.85)',
+                  backdropFilter: 'blur(4px)',
+                  letterSpacing: '0.12em',
+                }}
+              >
+                Demo Product
               </div>
             )}
           </div>

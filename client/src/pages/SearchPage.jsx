@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import ProductGrid from '../components/product/ProductGrid';
+import DemoSectionNotice from '../components/common/DemoSectionNotice';
 
 const ALL_PRODUCTS_FLAT = [
   { _id: '65b100000000000000000001', title: 'Oud Al Qamar', category: { name: 'Perfume' }, price: 8500, oldPrice: 10000, discount: 15, rating: 4.8, reviewCount: 124, images: ['https://picsum.photos/seed/perf1/600/700'], stock: 15 },
@@ -95,6 +96,8 @@ const SearchPage = () => {
                   : `No results for "${query}"`}
               </p>
             )}
+            {/* Demo notice — remove via IS_DEMO_MODE toggle in storeConfig.js */}
+            {results.length > 0 && <DemoSectionNotice />}
             <ProductGrid
               products={results}
               loading={loading}
