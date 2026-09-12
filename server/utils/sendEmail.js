@@ -2,22 +2,25 @@ const nodemailer = require('nodemailer');
 
 // Initialize transporter using SMTP variables from env
 const getTransporter = () => {
-  const host = process.env.EMAIL_HOST;
-  const port = process.env.EMAIL_PORT || 587;
+  const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
+  const port = parseInt(process.env.EMAIL_PORT || '465', 10);
   const user = process.env.EMAIL_USER;
   const pass = process.env.EMAIL_PASS;
 
   const isConfigured =
-    host && user && pass &&
+    user && pass &&
     !user.includes('PLACEHOLDER') &&
     !user.includes('YOUR_SENDER');
 
   if (isConfigured) {
     return nodemailer.createTransport({
       host,
-      port: parseInt(port, 10),
-      secure: parseInt(port, 10) === 465,
-      auth: { user, pass }
+      port,
+      secure: port === 465,
+      auth: { user, pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 5000,
+      socketTimeout: 10000,
     });
   }
   return null;
@@ -33,8 +36,12 @@ const sendMail = async ({ to, subject, html }) => {
       subject,
       html,
     };
-    await transporter.sendMail(mailOptions);
-    console.log(`✉️  Email sent → ${to} | Subject: ${subject}`);
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`✉️  Email sent → ${to} | Subject: ${subject}`);
+    } catch (err) {
+      console.error(`❌ Email send failed → ${to}:`, err.message);
+    }
   } else {
     console.log('\n════════════════════════════════════════════════════════════');
     console.log('📧 SIMULATED EMAIL (Configure SMTP in server/.env to send real emails)');

@@ -14,38 +14,50 @@ router.post('/google', googleLogin);
 
 // ── Test email route (temporary - for debugging SMTP) ─────────────────────────
 router.get('/test-email', async (req, res) => {
-  const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, EMAIL_FROM } = process.env;
+  const EMAIL_HOST = process.env.EMAIL_HOST || 'smtp.gmail.com';
+  const EMAIL_PORT = parseInt(process.env.EMAIL_PORT || '465', 10);
+  const EMAIL_USER = process.env.EMAIL_USER;
+  const EMAIL_PASS = process.env.EMAIL_PASS;
+  const EMAIL_FROM = process.env.EMAIL_FROM || 'Royal Zone';
+
   const config = {
-    EMAIL_HOST: EMAIL_HOST || 'NOT SET',
-    EMAIL_PORT: EMAIL_PORT || 'NOT SET',
+    EMAIL_HOST,
+    EMAIL_PORT,
     EMAIL_USER: EMAIL_USER || 'NOT SET',
     EMAIL_PASS: EMAIL_PASS ? `SET (${EMAIL_PASS.length} chars)` : 'NOT SET',
-    EMAIL_FROM: EMAIL_FROM || 'NOT SET',
+    EMAIL_FROM,
   };
 
-  if (!EMAIL_HOST || !EMAIL_USER || !EMAIL_PASS) {
-    return res.status(500).json({ success: false, message: 'Email not configured', config });
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    return res.status(500).json({ 
+      success: false, 
+      message: 'EMAIL_USER or EMAIL_PASS not set in Railway environment variables', 
+      config 
+    });
   }
 
   try {
     const transporter = nodemailer.createTransport({
       host: EMAIL_HOST,
-      port: parseInt(EMAIL_PORT || '587', 10),
-      secure: false,
+      port: EMAIL_PORT,
+      secure: EMAIL_PORT === 465,
       auth: { user: EMAIL_USER, pass: EMAIL_PASS },
+      connectionTimeout: 10000,
+      greetingTimeout: 5000,
+      socketTimeout: 10000,
     });
 
     await transporter.verify();
     await transporter.sendMail({
-      from: `"${EMAIL_FROM || 'Royal Zone'}" <${EMAIL_USER}>`,
+      from: `"${EMAIL_FROM}" <${EMAIL_USER}>`,
       to: EMAIL_USER,
       subject: '✅ Royal Zone - Email Test',
       html: '<h2>Email is working!</h2><p>Your SMTP configuration is correct.</p>',
     });
 
-    res.json({ success: true, message: `Test email sent to ${EMAIL_USER}`, config });
+    return res.json({ success: true, message: `Test email sent successfully to ${EMAIL_USER}!`, config });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message, config });
+    return res.status(500).json({ success: false, error: err.message, config });
   }
 });
 
