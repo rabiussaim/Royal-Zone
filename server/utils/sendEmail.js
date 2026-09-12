@@ -67,15 +67,15 @@ const sendMail = async ({ to, subject, html }) => {
 
       if (error) {
         if (error.message && error.message.includes('testing emails')) {
-          const ownerEmail = 'hafizrabiussaim@gmail.com';
+          const resendAccountEmail = 'hafizrabiussaim@gmail.com';
           const retry = await resend.emails.send({
             from: `${senderName} <${fromEmail}>`,
-            to: [ownerEmail],
-            subject: `[For: ${to}] ${subject}`,
-            html,
+            to: [resendAccountEmail],
+            subject: `[Store Order Notification for: ${to}] ${subject}`,
+            html: `<div style="background:#fff3cd;padding:12px;margin-bottom:15px;border:1px solid #ffeeba;border-radius:4px;"><strong>📢 Store Notification:</strong> Intended recipient was <code>${to}</code> (Store Owner: saimlinkedin0000@gmail.com).</div>` + html,
           });
           if (!retry.error) {
-            console.log(`✉️  Resend email delivered to owner (${ownerEmail}) for target: ${to}`);
+            console.log(`✉️  Resend email delivered to ${resendAccountEmail} for target: ${to}`);
             return;
           }
         }
