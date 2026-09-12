@@ -2,6 +2,11 @@ const express = require('express');
 const { register, login, getMe, updateProfile, changePassword, googleLogin } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+const customLookup = (hostname, options, callback) => {
+  return dns.lookup(hostname, { family: 4 }, callback);
+};
 
 const router = express.Router();
 
@@ -43,6 +48,7 @@ router.get('/test-email', async (req, res) => {
       secure: EMAIL_PORT === 465,
       auth: { user: EMAIL_USER, pass: EMAIL_PASS },
       family: 4,
+      lookup: customLookup,
       connectionTimeout: 10000,
       greetingTimeout: 5000,
       socketTimeout: 10000,

@@ -1,4 +1,9 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+const customLookup = (hostname, options, callback) => {
+  return dns.lookup(hostname, { family: 4 }, callback);
+};
 
 // Initialize transporter using SMTP variables from env
 const getTransporter = () => {
@@ -19,6 +24,7 @@ const getTransporter = () => {
       secure: port === 465,
       auth: { user, pass },
       family: 4,
+      lookup: customLookup,
       connectionTimeout: 10000,
       greetingTimeout: 5000,
       socketTimeout: 10000,
