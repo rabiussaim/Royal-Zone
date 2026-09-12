@@ -56,6 +56,7 @@ router.get('/test-email', async (req, res) => {
       auth: { user: EMAIL_USER, pass: EMAIL_PASS },
       tls: {
         servername: rawHost,
+        rejectUnauthorized: false,
       },
       connectionTimeout: 10000,
       greetingTimeout: 5000,

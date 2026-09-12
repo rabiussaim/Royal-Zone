@@ -37,6 +37,7 @@ const getTransporter = async () => {
       auth: { user, pass },
       tls: {
         servername: rawHost,
+        rejectUnauthorized: false,
       },
       connectionTimeout: 10000,
       greetingTimeout: 5000,
