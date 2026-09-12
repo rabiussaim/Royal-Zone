@@ -308,7 +308,7 @@ const sendCustomerPendingEmail = async (order, customerEmail) => {
     <div style="background:#e0f2f1;border-left:4px solid #00796b;border-radius:6px;padding:16px 18px;margin:20px 0;font-size:13px;line-height:1.9;">
       <p style="margin:0 0 10px;font-weight:bold;color:#00796b;font-size:14px;">⚡ EasyPaisa Payment Details</p>
       <table style="width:100%;border-collapse:collapse;">
-        <tr><td style="padding:3px 0;color:#555;width:45%;">📱 EasyPaisa Number:</td><td style="font-weight:bold;color:#00695c;">03323783711</td></tr>
+        <tr><td style="padding:3px 0;color:#555;width:45%;">📱 EasyPaisa Number:</td><td style="font-weight:bold;color:#00695c;">03367947525</td></tr>
         <tr><td style="padding:3px 0;color:#555;">🏦 IBAN:</td><td style="font-weight:bold;color:#00695c;font-size:12px;">PK39TMFB0000000042714749</td></tr>
         <tr><td style="padding:3px 0;color:#555;">💰 Amount:</td><td style="font-weight:bold;color:#C9A96E;font-size:15px;">PKR ${order.total.toLocaleString()}</td></tr>
       </table>

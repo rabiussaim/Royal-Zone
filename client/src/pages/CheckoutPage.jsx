@@ -18,7 +18,7 @@ const BANK_DETAILS = {
 };
 
 const EASYPAISA_DETAILS = {
-  number: '03323783711',
+  number: '03367947525',
   iban: 'PK39TMFB0000000042714749',
   instructions: 'Send payment to the number above, then send screenshot to WhatsApp: +92-336-7947525 to confirm your order.',
 };
