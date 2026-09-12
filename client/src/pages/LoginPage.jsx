@@ -12,7 +12,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 const LoginPage = () => {
   console.log('Google Client ID loaded in client:', GOOGLE_CLIENT_ID);
-  const { login } = useAuth();
+  const { login, loginWithToken } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -87,17 +87,12 @@ const LoginPage = () => {
 
       const { token, user } = res.data;
 
-      // Manually store token + user (same as login flow)
-      storage.set('rz_token', token);
-      storage.set('rz_user', user);
-
-      // Trigger auth context update
-      await login({ email: user.email, password: '__google_oauth__', _skipValidation: true });
+      // Set user directly in auth context — no second API call needed
+      loginWithToken(token, user);
 
       toast(`Welcome, ${user.name}! 👑`, 'success');
       navigate('/');
     } catch (err) {
-      // If backend not configured yet, show friendly message
       const msg = err.response?.data?.message || 'Google sign-in failed. Please try email login.';
       toast(msg, 'error');
     } finally {

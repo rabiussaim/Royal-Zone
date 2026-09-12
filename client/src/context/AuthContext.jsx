@@ -88,6 +88,17 @@ export const AuthProvider = ({ children }) => {
     return { user: registeredUser };
   }, []);
 
+  // Used after Google OAuth — sets user directly without API call
+  const loginWithToken = useCallback((token, userData) => {
+    if (userData.email?.toLowerCase().trim() === OWNER_EMAIL) {
+      userData.role = 'admin';
+    }
+    storage.set('rz_token', token);
+    storage.set('rz_user', userData);
+    setUser(userData);
+    return { user: userData };
+  }, []);
+
   const logout = useCallback(() => {
     storage.remove('rz_token');
     storage.remove('rz_user');
@@ -115,6 +126,7 @@ export const AuthProvider = ({ children }) => {
       logout,
       register,
       updateProfile,
+      loginWithToken,
       isLoggedIn,
       isGuest,
       isOwner,
