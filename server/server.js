@@ -29,7 +29,12 @@ app.use(express.json());
 
 // Security middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production'
+    ? process.env.CLIENT_URL
+    : true, // allow all in dev
+  credentials: true,
+}));
 
 // Prevent HTTP 304 caching on API routes
 app.use('/api', (req, res, next) => {
