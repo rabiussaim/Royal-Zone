@@ -47,8 +47,36 @@ const getTransporter = async () => {
   return null;
 };
 
+const { Resend } = require('resend');
+
 // ─── Helper: send a mail ──────────────────────────────────────────────────────
 const sendMail = async ({ to, subject, html }) => {
+  // Option 1: Use Resend API if configured (HTTPS based - works 100% on Railway)
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const fromEmail = process.env.EMAIL_FROM_ADDRESS || 'onboarding@resend.dev';
+      const senderName = process.env.EMAIL_FROM || 'Royal Zone';
+
+      const { data, error } = await resend.emails.send({
+        from: `${senderName} <${fromEmail}>`,
+        to: [to],
+        subject,
+        html,
+      });
+
+      if (error) {
+        console.error(`❌ Resend email failed → ${to}:`, error.message);
+      } else {
+        console.log(`✉️  Resend email sent → ${to} | ID: ${data?.id}`);
+      }
+      return;
+    } catch (err) {
+      console.error(`❌ Resend error → ${to}:`, err.message);
+    }
+  }
+
+  // Option 2: Fallback to SMTP
   const transporter = await getTransporter();
   if (transporter) {
     const mailOptions = {

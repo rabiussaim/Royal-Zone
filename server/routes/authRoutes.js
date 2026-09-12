@@ -17,8 +17,38 @@ router.put('/profile', protect, updateProfile);
 router.put('/change-password', protect, changePassword);
 router.post('/google', googleLogin);
 
-// ── Test email route (temporary - for debugging SMTP) ─────────────────────────
+// ── Test email route (temporary - for debugging SMTP/Resend) ─────────────────────────
 router.get('/test-email', async (req, res) => {
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const { Resend } = require('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const fromEmail = process.env.EMAIL_FROM_ADDRESS || 'onboarding@resend.dev';
+      const senderName = process.env.EMAIL_FROM || 'Royal Zone';
+      const recipient = process.env.EMAIL_USER || 'saimlinkedin0000@gmail.com';
+
+      const { data, error } = await resend.emails.send({
+        from: `${senderName} <${fromEmail}>`,
+        to: [recipient],
+        subject: '✅ Royal Zone - Resend Email Test',
+        html: '<h2>Resend is working!</h2><p>Your email sending via Resend API is active and working.</p>',
+      });
+
+      if (error) {
+        return res.status(500).json({ success: false, provider: 'Resend', error: error.message });
+      }
+
+      return res.json({
+        success: true,
+        provider: 'Resend',
+        message: `Test email sent successfully to ${recipient} via Resend API!`,
+        id: data?.id,
+      });
+    } catch (err) {
+      return res.status(500).json({ success: false, provider: 'Resend', error: err.message });
+    }
+  }
+
   const rawHost = process.env.EMAIL_HOST || 'smtp.gmail.com';
   const EMAIL_PORT = parseInt(process.env.EMAIL_PORT || '465', 10);
   const EMAIL_USER = process.env.EMAIL_USER;
