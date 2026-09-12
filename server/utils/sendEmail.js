@@ -18,6 +18,7 @@ const getTransporter = () => {
       port,
       secure: port === 465,
       auth: { user, pass },
+      family: 4,
       connectionTimeout: 10000,
       greetingTimeout: 5000,
       socketTimeout: 10000,

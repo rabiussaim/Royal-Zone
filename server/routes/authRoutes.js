@@ -42,6 +42,7 @@ router.get('/test-email', async (req, res) => {
       port: EMAIL_PORT,
       secure: EMAIL_PORT === 465,
       auth: { user: EMAIL_USER, pass: EMAIL_PASS },
+      family: 4,
       connectionTimeout: 10000,
       greetingTimeout: 5000,
       socketTimeout: 10000,
