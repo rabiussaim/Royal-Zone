@@ -29,8 +29,9 @@ const app = express();
 // Disable ETag caching for dynamic API responses
 app.set('etag', false);
 
-// Body parser
-app.use(express.json());
+// Body parser (10mb limit for base64 product image uploads)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Security middleware
 app.use(helmet());

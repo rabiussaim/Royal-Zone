@@ -24,7 +24,7 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
 
   const isHomePage = location.pathname === '/';
-  const isTransparent = isHomePage && !scrolled;
+  const isTransparent = false;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);

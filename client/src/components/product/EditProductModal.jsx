@@ -81,6 +81,30 @@ const EditProductModal = ({ product, isOpen, onClose, onSave }) => {
     }
   };
 
+  const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    files.forEach((file) => {
+      if (!file.type.startsWith('image/')) {
+        toast('Please select a valid image file', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target.result;
+        setForm((prev) => {
+          if (!prev.images.includes(base64)) {
+            return { ...prev, images: [...prev.images, base64] };
+          }
+          return prev;
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title.trim()) return toast('Product title is required', 'error');
@@ -209,15 +233,31 @@ const EditProductModal = ({ product, isOpen, onClose, onSave }) => {
                 </button>
               ))}
             </div>
-            <div className="flex gap-2">
-              <input
-                name="customImageUrl"
-                value={form.customImageUrl}
-                onChange={handleChange}
-                placeholder="Custom image URL..."
-                className="form-input text-xs flex-1"
-              />
-              <button type="button" onClick={addCustomImage} className="btn-secondary px-3 py-1 text-xs">Add</button>
+            <div className="space-y-2">
+              <label className="flex items-center justify-center gap-2 p-2.5 border border-dashed border-gold-500/50 hover:border-gold-500 rounded-lg cursor-pointer bg-gold-500/5 hover:bg-gold-500/10 transition-all text-xs font-semibold text-gold-600 dark:text-gold-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>📁 Upload Image from Computer</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </label>
+
+              <div className="flex gap-2">
+                <input
+                  name="customImageUrl"
+                  value={form.customImageUrl}
+                  onChange={handleChange}
+                  placeholder="Custom image URL..."
+                  className="form-input text-xs flex-1"
+                />
+                <button type="button" onClick={addCustomImage} className="btn-secondary px-3 py-1 text-xs">Add URL</button>
+              </div>
             </div>
           </div>
 
