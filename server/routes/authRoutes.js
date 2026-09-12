@@ -25,7 +25,8 @@ router.get('/test-email', async (req, res) => {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const fromEmail = process.env.EMAIL_FROM_ADDRESS || 'onboarding@resend.dev';
       const senderName = process.env.EMAIL_FROM || 'Royal Zone';
-      const recipient = process.env.EMAIL_USER || 'saimlinkedin0000@gmail.com';
+      // In Resend free onboarding domain, emails can only be sent to the Resend account owner email
+      const recipient = 'hafizrabiussaim@gmail.com';
 
       const { data, error } = await resend.emails.send({
         from: `${senderName} <${fromEmail}>`,
@@ -41,7 +42,7 @@ router.get('/test-email', async (req, res) => {
       return res.json({
         success: true,
         provider: 'Resend',
-        message: `Test email sent successfully to ${recipient} via Resend API!`,
+        message: `Test email sent successfully to ${recipient} via Resend API! Check your inbox!`,
         id: data?.id,
       });
     } catch (err) {

@@ -66,6 +66,19 @@ const sendMail = async ({ to, subject, html }) => {
       });
 
       if (error) {
+        if (error.message && error.message.includes('testing emails')) {
+          const ownerEmail = 'hafizrabiussaim@gmail.com';
+          const retry = await resend.emails.send({
+            from: `${senderName} <${fromEmail}>`,
+            to: [ownerEmail],
+            subject: `[For: ${to}] ${subject}`,
+            html,
+          });
+          if (!retry.error) {
+            console.log(`✉️  Resend email delivered to owner (${ownerEmail}) for target: ${to}`);
+            return;
+          }
+        }
         console.error(`❌ Resend email failed → ${to}:`, error.message);
       } else {
         console.log(`✉️  Resend email sent → ${to} | ID: ${data?.id}`);
