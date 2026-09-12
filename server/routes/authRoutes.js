@@ -19,36 +19,44 @@ router.post('/google', googleLogin);
 
 // ── Test email route (temporary - for debugging SMTP) ─────────────────────────
 router.get('/test-email', async (req, res) => {
-  const EMAIL_HOST = process.env.EMAIL_HOST || 'smtp.gmail.com';
+  const rawHost = process.env.EMAIL_HOST || 'smtp.gmail.com';
   const EMAIL_PORT = parseInt(process.env.EMAIL_PORT || '465', 10);
   const EMAIL_USER = process.env.EMAIL_USER;
   const EMAIL_PASS = process.env.EMAIL_PASS;
   const EMAIL_FROM = process.env.EMAIL_FROM || 'Royal Zone';
 
-  const config = {
-    EMAIL_HOST,
-    EMAIL_PORT,
-    EMAIL_USER: EMAIL_USER || 'NOT SET',
-    EMAIL_PASS: EMAIL_PASS ? `SET (${EMAIL_PASS.length} chars)` : 'NOT SET',
-    EMAIL_FROM,
-  };
-
   if (!EMAIL_USER || !EMAIL_PASS) {
     return res.status(500).json({ 
       success: false, 
       message: 'EMAIL_USER or EMAIL_PASS not set in Railway environment variables', 
-      config 
     });
   }
 
   try {
+    const ipv4Host = await new Promise((resolve) => {
+      dns.lookup(rawHost, { family: 4 }, (err, address) => {
+        if (!err && address) resolve(address);
+        else resolve(rawHost);
+      });
+    });
+
+    const config = {
+      EMAIL_HOST: rawHost,
+      RESOLVED_IPV4: ipv4Host,
+      EMAIL_PORT,
+      EMAIL_USER: EMAIL_USER || 'NOT SET',
+      EMAIL_PASS: EMAIL_PASS ? `SET (${EMAIL_PASS.length} chars)` : 'NOT SET',
+      EMAIL_FROM,
+    };
+
     const transporter = nodemailer.createTransport({
-      host: EMAIL_HOST,
+      host: ipv4Host,
       port: EMAIL_PORT,
       secure: EMAIL_PORT === 465,
       auth: { user: EMAIL_USER, pass: EMAIL_PASS },
-      family: 4,
-      lookup: customLookup,
+      tls: {
+        servername: rawHost,
+      },
       connectionTimeout: 10000,
       greetingTimeout: 5000,
       socketTimeout: 10000,
@@ -64,7 +72,7 @@ router.get('/test-email', async (req, res) => {
 
     return res.json({ success: true, message: `Test email sent successfully to ${EMAIL_USER}!`, config });
   } catch (err) {
-    return res.status(500).json({ success: false, error: err.message, config });
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 

@@ -5,9 +5,20 @@ const customLookup = (hostname, options, callback) => {
   return dns.lookup(hostname, { family: 4 }, callback);
 };
 
+// Helper to resolve host to IPv4 address to prevent ENETUNREACH on IPv6-less hosts (Railway)
+const resolveIPv4Host = async (hostname) => {
+  if (!hostname || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return hostname;
+  return new Promise((resolve) => {
+    dns.lookup(hostname, { family: 4 }, (err, address) => {
+      if (!err && address) resolve(address);
+      else resolve(hostname);
+    });
+  });
+};
+
 // Initialize transporter using SMTP variables from env
-const getTransporter = () => {
-  const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
+const getTransporter = async () => {
+  const rawHost = process.env.EMAIL_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.EMAIL_PORT || '465', 10);
   const user = process.env.EMAIL_USER;
   const pass = process.env.EMAIL_PASS;
@@ -18,13 +29,15 @@ const getTransporter = () => {
     !user.includes('YOUR_SENDER');
 
   if (isConfigured) {
+    const ipv4Host = await resolveIPv4Host(rawHost);
     return nodemailer.createTransport({
-      host,
+      host: ipv4Host,
       port,
       secure: port === 465,
       auth: { user, pass },
-      family: 4,
-      lookup: customLookup,
+      tls: {
+        servername: rawHost,
+      },
       connectionTimeout: 10000,
       greetingTimeout: 5000,
       socketTimeout: 10000,
@@ -35,7 +48,7 @@ const getTransporter = () => {
 
 // ─── Helper: send a mail ──────────────────────────────────────────────────────
 const sendMail = async ({ to, subject, html }) => {
-  const transporter = getTransporter();
+  const transporter = await getTransporter();
   if (transporter) {
     const mailOptions = {
       from: `"${process.env.EMAIL_FROM || 'Royal Zone'}" <${process.env.EMAIL_USER}>`,
