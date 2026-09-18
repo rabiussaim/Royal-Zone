@@ -31,14 +31,14 @@ const HeroSection = () => {
   const wDimmed = hovered === 'men';
   const mDimmed = hovered === 'women';
 
-  // Flex sizes for hover expand/contract ONLY on desktop
+  // Flex sizes for hover expand/contract ONLY on desktop; strict 50/50 split on mobile
   const wFlex = isDesktop
     ? (hovered === 'women' ? '0 0 60%' : hovered === 'men' ? '0 0 40%' : '0 0 50%')
-    : '1 1 50%';
+    : '0 0 50%';
 
   const mFlex = isDesktop
     ? (hovered === 'men' ? '0 0 60%' : hovered === 'women' ? '0 0 40%' : '0 0 50%')
-    : '1 1 50%';
+    : '0 0 50%';
 
   const panelTransition = 'flex 0.75s cubic-bezier(0.4, 0, 0.2, 1)';
 
@@ -52,12 +52,17 @@ const HeroSection = () => {
       {/* ══════════════════════════════════════════════════
           SPLIT PANELS
       ══════════════════════════════════════════════════ */}
-      <div className="absolute inset-0 flex flex-col md:flex-row">
+      <div className="absolute inset-0 flex flex-col md:flex-row pt-16 sm:pt-20 md:pt-0">
 
         {/* ─── LEFT — WOMEN ─────────────────────────────── */}
         <div
           className="relative overflow-hidden cursor-pointer"
-          style={{ flex: wFlex, transition: panelTransition, minHeight: '50%' }}
+          style={{
+            flex: wFlex,
+            transition: panelTransition,
+            height: isDesktop ? '100%' : '50%',
+            maxHeight: isDesktop ? '100%' : '50%',
+          }}
           onMouseEnter={() => setHovered('women')}
           onMouseLeave={() => setHovered(null)}
         >
@@ -76,7 +81,7 @@ const HeroSection = () => {
                 className="w-full h-full"
                 style={{
                   objectFit: 'cover',
-                  objectPosition: 'right 0%',
+                  objectPosition: isDesktop ? 'right 70%' : 'right 65%',
                   transform: `scaleX(-1) scale(${hovered === 'women' ? 1.05 : 1.0})`,
                   filter: `brightness(${wDimmed ? 0.48 : 1.0}) saturate(${wDimmed ? 0.5 : 1.0})`,
                   transition: 'transform 0.75s cubic-bezier(0.4,0,0.2,1), filter 0.65s ease',
@@ -142,9 +147,9 @@ const HeroSection = () => {
               <h2 className="mb-1.5 sm:mb-4" style={{
                 fontFamily: '"Playfair Display", serif',
                 fontWeight: 700,
-                fontSize: 'clamp(1.3rem, 3.5vw, 3.4rem)',
+                fontSize: 'clamp(1.3rem, 3.2vw, 2.8rem)',
                 color: wDimmed ? 'rgba(255,255,255,0.4)' : '#fff',
-                lineHeight: 1.05,
+                lineHeight: 1.08,
                 textShadow: '0 2px 28px rgba(0,0,0,0.65)',
                 transition: 'color 0.6s ease',
               }}>
@@ -206,7 +211,12 @@ const HeroSection = () => {
         {/* ─── RIGHT — MEN ─────────────────────────────── */}
         <div
           className="relative overflow-hidden cursor-pointer"
-          style={{ flex: mFlex, transition: panelTransition, minHeight: '50%' }}
+          style={{
+            flex: mFlex,
+            transition: panelTransition,
+            height: isDesktop ? '100%' : '50%',
+            maxHeight: isDesktop ? '100%' : '50%',
+          }}
           onMouseEnter={() => setHovered('men')}
           onMouseLeave={() => setHovered(null)}
         >
@@ -225,7 +235,7 @@ const HeroSection = () => {
                 className="w-full h-full"
                 style={{
                   objectFit: 'cover',
-                  objectPosition: 'left 0%',
+                  objectPosition: isDesktop ? 'left 15%' : 'left 30%',
                   transform: `scaleX(-1) scale(${hovered === 'men' ? 1.05 : 1.0})`,
                   filter: `brightness(${mDimmed ? 0.48 : 1.0}) saturate(${mDimmed ? 0.5 : 1.0})`,
                   transition: 'transform 0.75s cubic-bezier(0.4,0,0.2,1), filter 0.65s ease',
@@ -478,7 +488,7 @@ const HeroSection = () => {
       <div
         className={`md:hidden absolute z-20 flex justify-center transition-all duration-700 ${phase >= 3 ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
         style={{
-          top: '50%',
+          top: 'calc(50% + 32px)',
           left: 0,
           right: 0,
           transform: 'translateY(-50%)',

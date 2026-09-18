@@ -232,7 +232,7 @@ const PerfumesPage = () => {
                 alt="Women's Fragrances"
                 className="w-full h-full object-cover"
                 style={{
-                  objectPosition: 'right 0%',
+                  objectPosition: 'right 70%',
                   transform: `scaleX(-1) scale(${hoveredSplit === 'women' ? 1.06 : 1.0})`,
                   filter: `brightness(${hoveredSplit === 'men' ? 0.45 : 1.05})`,
                   transition: 'transform 0.65s ease, filter 0.65s ease',
@@ -264,7 +264,7 @@ const PerfumesPage = () => {
                 alt="Men's Fragrances"
                 className="w-full h-full object-cover"
                 style={{
-                  objectPosition: 'left 0%',
+                  objectPosition: 'left 15%',
                   transform: `scaleX(-1) scale(${hoveredSplit === 'men' ? 1.06 : 1.0})`,
                   filter: `brightness(${hoveredSplit === 'women' ? 0.45 : 1.05})`,
                   transition: 'transform 0.65s ease, filter 0.65s ease',
