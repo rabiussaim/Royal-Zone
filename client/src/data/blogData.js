@@ -36,31 +36,28 @@ export const BLOG_POSTS = [
   },
   {
     id: 'b2',
-    slug: 'egyptian-cotton-bedsheets-care-guide',
-    title: 'The Ultimate Guide to 1000 Thread Count Egyptian Cotton Bedsheets',
-    excerpt: 'Why thread count matters, how high-grade long-staple cotton guarantees five-star hotel comfort, and essential washing tips for lifelong softness.',
+    slug: 'preserve-luxury-perfumes-guide',
+    title: 'How to Store & Preserve Your Luxury Perfumes for Maximum Longevity',
+    excerpt: 'Discover expert tips on temperature, light exposure, and bottle care to keep your precious Oud and French fragrances smelling fresh for years.',
     content: `
-      <h2>Why 1000TC Egyptian Cotton Belongs in Your Bedroom</h2>
-      <p>Transforming your sleep quality begins with your bed linens. Authentic Egyptian cotton is crafted from extra-long staple (ELS) fibers, creating yarn that is exceptionally soft, durable, and naturally breathable.</p>
+      <h2>The Art of Perfume Preservation</h2>
+      <p>Luxury perfumes are delicate compositions of natural oils, aromatic compounds, and fine spirits. Heat, sunlight, and humidity can degrade delicate top notes over time.</p>
 
-      <h3>Thread Count Myth vs Reality</h3>
-      <p>Not all high thread counts are created equal. Synthetic blends use double-ply threads to artificially inflate numbers. Royal Zone's 1000TC collection uses single-ply, 100% combed cotton, yielding crisp yet silky sheets that get softer with every single wash.</p>
-
-      <h3>Key Care Tips for Premium Bedding</h3>
+      <h3>Essential Rules for Storing Fragrances</h3>
       <ol>
-        <li><strong>Wash in cold water:</strong> Preserves fiber integrity and rich dye color vibrancy.</li>
-        <li><strong>Use mild liquid detergent:</strong> Harsh bleach or optical brighteners degrade natural cotton fibers.</li>
-        <li><strong>Air dry in shade:</strong> Gentle breeze drying prevents shrinkage and retains natural luster.</li>
+        <li><strong>Keep away from direct sunlight:</strong> UV rays break down delicate fragrance molecules. Store in a dark closet or original presentation box.</li>
+        <li><strong>Maintain a stable temperature:</strong> Avoid bathroom humidity or extreme temperature swings.</li>
+        <li><strong>Keep bottles tightly sealed:</strong> Prevents oxidation and evaporation of precious top notes.</li>
       </ol>
     `,
-    category: 'Bedding & Home',
+    category: 'Perfume Care',
     author: 'Fatima Malik',
-    authorRole: 'Interior Designer',
+    authorRole: 'Fragrance Specialist',
     authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
     date: 'August 2, 2026',
     readTime: '4 min read',
-    image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=800&q=80',
-    tags: ['Bedsheets', 'Egyptian Cotton', 'Home Decor', 'Sleep Quality'],
+    image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80',
+    tags: ['Perfume Care', 'Fragrance Guide', 'Luxury Lifestyle'],
     featured: true,
   },
   {

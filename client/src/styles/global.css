@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -17,6 +17,10 @@
   --color-navy-mid: #0D1426;
   --color-cream: #FAFAF8;
   --color-cream-2: #F5F0E8;
+  --color-crimson: #6B1414;
+  --color-crimson-dark: #2D0A0A;
+  --color-crimson-light: #8B2020;
+  --color-charcoal: #0A0A0A;
   --scrollbar-width: 6px;
 }
 
@@ -119,6 +123,39 @@ body {
   from { opacity: 1; transform: translateX(0); }
   to { opacity: 0; transform: translateX(100%); }
 }
+@keyframes heroReveal {
+  from { opacity: 0; transform: scale(1.04); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes heroTextReveal {
+  from { opacity: 0; transform: translateY(20px) skewY(1deg); }
+  to { opacity: 1; transform: translateY(0) skewY(0deg); }
+}
+@keyframes heroLineReveal {
+  from { width: 0; opacity: 0; }
+  to { width: 60px; opacity: 1; }
+}
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-8px) rotate(0.5deg); }
+  66% { transform: translateY(-4px) rotate(-0.3deg); }
+}
+@keyframes splitRevealLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes splitRevealRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes subtlePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+@keyframes dividerDrop {
+  from { height: 0; opacity: 0; }
+  to { height: 70%; opacity: 1; }
+}
 
 /* =============================================
    Utility Classes
@@ -129,6 +166,14 @@ body {
 .animate-zoom-in { animation: zoomIn 0.4s ease-out both; }
 .animate-float { animation: float 3s ease-in-out infinite; }
 .animate-float-reverse { animation: floatReverse 3s ease-in-out infinite; }
+.animate-gentle-float { animation: gentleFloat 6s ease-in-out infinite; }
+.animate-hero-reveal { animation: heroReveal 1.4s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.animate-hero-text { animation: heroTextReveal 0.9s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.animate-hero-line { animation: heroLineReveal 0.8s ease-out both; }
+.animate-split-left { animation: splitRevealLeft 0.8s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.animate-split-right { animation: splitRevealRight 0.8s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.animate-subtle-pulse { animation: subtlePulse 3s ease-in-out infinite; }
+.animate-divider-drop { animation: dividerDrop 1.2s ease-out both; }
 
 .toast-enter { animation: toastEnter 0.35s ease-out; }
 .toast-exit { animation: toastExit 0.35s ease-in forwards; }

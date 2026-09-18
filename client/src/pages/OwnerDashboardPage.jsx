@@ -12,11 +12,11 @@ import { formatPrice, formatDate } from '../utils/helpers';
 // Initial sample catalog
 const INITIAL_STORE_PRODUCTS = [
   { _id: '65c000000000000000000001', title: 'Oud Al Qamar', category: 'Perfume', price: 8500, oldPrice: 10000, stock: 15, featured: true, images: ['https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80'] },
-  { _id: '65c000000000000000000002', title: 'Royal Cotton 1000TC', category: 'Bedsheet', price: 12500, oldPrice: 15000, stock: 8, luxuryCollection: true, images: ['https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=600&q=80'] },
+  { _id: '65c000000000000000000002', title: 'Persian Jasmine', category: 'Perfume', price: 7500, oldPrice: 9000, stock: 18, newArrival: true, images: ['https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=600&q=80'] },
   { _id: '65c000000000000000000003', title: 'Rose Noire', category: 'Perfume', price: 6800, oldPrice: 8500, stock: 22, newArrival: true, images: ['https://images.unsplash.com/photo-1615397349754-cfa2066a298e?auto=format&fit=crop&w=600&q=80'] },
-  { _id: '65c000000000000000000004', title: 'Silk Touch Luxury Set', category: 'Bedsheet', price: 18000, oldPrice: 22000, stock: 5, luxuryCollection: true, images: ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&q=80'] },
+  { _id: '65c000000000000000000004', title: 'Midnight Oud', category: 'Perfume', price: 14500, oldPrice: 16500, stock: 20, bestSeller: true, images: ['https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=600&q=80'] },
   { _id: '65c000000000000000000005', title: 'Amber Mystique', category: 'Perfume', price: 11200, oldPrice: 13500, stock: 30, featured: true, images: ['https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=600&q=80'] },
-  { _id: '65c000000000000000000006', title: 'Egyptian Cotton King', category: 'Bedsheet', price: 22000, oldPrice: 27000, stock: 10, luxuryCollection: true, images: ['https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=600&q=80'] },
+  { _id: '65c000000000000000000006', title: 'Black Orchid Parfum', category: 'Perfume', price: 24500, oldPrice: 28000, stock: 6, luxuryCollection: true, images: ['https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?auto=format&fit=crop&w=600&q=80'] },
 ];
 
 const SAMPLE_ORDERS = [

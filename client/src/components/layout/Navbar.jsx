@@ -66,7 +66,8 @@ const Navbar = () => {
   // Nav links — + Add Product is ONLY visible if user is authenticated as Store Owner
   const navLinks = [
     { to: '/', label: 'Home', end: true },
-    { to: '/bedsheets', label: 'Bedsheet Designs' },
+    { to: '/perfumes?gender=women', label: 'Women' },
+    { to: '/perfumes?gender=men', label: 'Men' },
     { to: '/perfumes', label: 'Perfumes' },
     { to: '/blog', label: 'Journal' },
     ...(isOwner ? [{ to: '/add-product', label: '✨ Add Product' }] : []),
@@ -86,8 +87,8 @@ const Navbar = () => {
           announcementOpen ? 'top-9' : 'top-0'
         } ${
           isTransparent
-            ? 'bg-transparent py-1.5'
-            : 'navbar-glass shadow-md py-0.5'
+            ? 'bg-transparent py-2'
+            : 'navbar-glass shadow-md py-2'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -101,40 +102,40 @@ const Navbar = () => {
               <img
                 src="/logo.png"
                 alt="Royal Zone Logo"
-                className="h-12 md:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                className="h-9 md:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               />
-              <span className={`font-display text-xl md:text-2xl font-bold tracking-wide hidden sm:inline ${isTransparent ? 'text-white' : 'text-navy-900 dark:text-white'}`}>
+              <span className={`font-display text-lg md:text-xl font-bold tracking-wider hidden sm:inline ${isTransparent ? 'text-white' : 'text-navy-900 dark:text-white'}`}>
                 ROYAL <span style={{ color: 'var(--color-gold)' }}>ZONE</span>
               </span>
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-6">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  end={link.end}
-                  className={({ isActive }) =>
-                    `text-sm font-medium transition-colors duration-200 relative pb-1 ${
+              {navLinks.map((link) => {
+                // Smart active detection — handles query-param links too
+                const [linkPath, linkSearch] = link.to.split('?');
+                const isActive = link.end
+                  ? location.pathname === linkPath && (!linkSearch || location.search === `?${linkSearch}`)
+                  : location.pathname.startsWith(linkPath) && (!linkSearch || location.search === `?${linkSearch}`);
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`text-sm font-medium transition-colors duration-200 relative pb-1 ${
                       isActive
                         ? 'text-gold-500 font-semibold'
                         : isTransparent
                         ? 'text-white hover:text-gold-400'
                         : 'text-gray-800 dark:text-gray-100 hover:text-gold-500'
-                    }`
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      {link.label}
-                      {isActive && (
-                        <span className="absolute bottom-0 left-0 w-full h-[2px] bg-gold-500 rounded-full" />
-                      )}
-                    </>
-                  )}
-                </NavLink>
-              ))}
+                    }`}
+                  >
+                    {link.label}
+                    {isActive && (
+                      <span className="absolute bottom-0 left-0 w-full h-[2px] bg-gold-500 rounded-full" />
+                    )}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Right Actions */}
@@ -327,23 +328,30 @@ const Navbar = () => {
         {menuOpen && (
           <div className="lg:hidden bg-white/95 dark:bg-navy-900/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 animate-slide-down shadow-luxury max-h-[80vh] overflow-y-auto">
             <div className="px-4 pt-3 pb-6 space-y-2">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  end={link.end}
-                  onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `block px-4 py-3 rounded-xl text-base font-semibold transition-all ${
+              {navLinks.map((link) => {
+                const [linkPath, linkSearch] = link.to.split('?');
+                const isActive = link.end
+                  ? location.pathname === linkPath && (!linkSearch || location.search === `?${linkSearch}`)
+                  : location.pathname.startsWith(linkPath) && (!linkSearch || location.search === `?${linkSearch}`);
+                const isBedsheets = link.to === '/bedsheets';
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setMenuOpen(false)}
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-base font-semibold transition-all ${
                       isActive
                         ? 'bg-gold-500/15 text-gold-500'
                         : 'text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-navy-800'
-                    }`
-                  }
-                >
-                  {link.label}
-                </NavLink>
-              ))}
+                    }`}
+                  >
+                    {link.label}
+                    {isBedsheets && (
+                      <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm" style={{ background: 'rgba(0,0,0,0.07)', color: '#888' }}>Soon</span>
+                    )}
+                  </Link>
+                );
+              })}
 
               {isOwner && (
                 <NavLink

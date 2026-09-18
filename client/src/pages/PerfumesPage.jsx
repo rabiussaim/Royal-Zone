@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, Link } from 'react-router-dom';
 import ProductGrid from '../components/product/ProductGrid';
 import SectionTitle from '../components/ui/SectionTitle';
+import SEO from '../components/common/SEO';
 import { formatPrice } from '../utils/helpers';
 import DemoSectionNotice from '../components/common/DemoSectionNotice';
 
-// Dummy perfume products — replace with API call later
+// Dummy perfume products
 const ALL_PERFUMES = [
   { _id: '65b100000000000000000001', title: 'Oud Al Qamar', category: { name: 'Perfume' }, price: 8500, oldPrice: 10000, discount: 15, rating: 4.8, reviewCount: 124, images: ['https://picsum.photos/seed/perf1/600/700'], stock: 15, description: 'A deep, rich oud fragrance with notes of rose and amber.', tags: ['oud', 'oriental'] },
   { _id: '65b100000000000000000002', title: 'Rose Noire', category: { name: 'Perfume' }, price: 6800, oldPrice: 8500, discount: 20, rating: 4.7, reviewCount: 203, images: ['https://picsum.photos/seed/perf2/600/700'], stock: 22, newArrival: true, description: 'Dark rose with black pepper and patchouli.', tags: ['floral', 'dark'] },
@@ -37,10 +39,30 @@ const SORT_OPTIONS = [
 ];
 
 const PerfumesPage = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const genderParam = params.get('gender') || '';
+
   const [sort, setSort] = useState('featured');
   const [filter, setFilter] = useState('all');
+  const [gender, setGender] = useState(genderParam); // 'women' | 'men' | ''
   const [priceMax, setPriceMax] = useState(30000);
   const [search, setSearch] = useState('');
+  const [hoveredSplit, setHoveredSplit] = useState(null); // 'women' | 'men' | null
+  const [bannerHovered, setBannerHovered] = useState(false);
+
+  // Sync gender state when URL param changes (e.g. nav link clicks)
+  useEffect(() => {
+    const p = new URLSearchParams(location.search);
+    setGender(p.get('gender') || '');
+  }, [location.search]);
+
+  const pageTitle = gender === 'women' ? 'For Her' : gender === 'men' ? 'For Him' : 'Perfumes';
+  const pageSubtitle = gender === 'women'
+    ? 'Elegance and grace — bottled for her.'
+    : gender === 'men'
+    ? 'Bold, timeless fragrances — crafted for him.'
+    : 'Discover scents that tell your story';
 
   const filtered = ALL_PERFUMES
     .filter((p) => {
@@ -48,6 +70,9 @@ const PerfumesPage = () => {
       if (filter === 'bestseller' && !p.bestSeller) return false;
       if (filter === 'luxury' && !p.luxuryCollection) return false;
       if (filter === 'sale' && !p.discount) return false;
+      // Gender filter
+      if (gender === 'women' && p.gender !== 'women' && !p.tags?.some(t => ['floral','rose','jasmine','iris','fresh','elegant'].includes(t))) return false;
+      if (gender === 'men' && p.gender !== 'men' && !p.tags?.some(t => ['oud','woody','leather','smoky','bold','earthy','tobacco','cedar'].includes(t))) return false;
       if (p.price > priceMax) return false;
       if (search && !p.title.toLowerCase().includes(search.toLowerCase()) && !p.tags?.some(t => t.includes(search.toLowerCase()))) return false;
       return true;
@@ -61,22 +86,229 @@ const PerfumesPage = () => {
 
   return (
     <div className="pt-20 bg-cream-50 dark:bg-navy-900 min-h-screen">
-      {/* Banner */}
-      <div className="relative h-64 md:h-80 overflow-hidden" style={{ background: 'linear-gradient(135deg, #0A0F1E 0%, #1A2238 50%, #0A0F1E 100%)' }}>
-        <img
-          src="https://images.unsplash.com/photo-1615397349754-cfa2066a298e?auto=format&fit=crop&w=1920&q=80"
-          alt="Perfumes"
-          className="w-full h-full object-cover"
-          onError={(e) => { e.target.style.display = 'none'; }}
-        />
-        <div className="absolute inset-0 hero-overlay" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-          <p className="text-gold-400 text-sm font-medium uppercase tracking-widest mb-3 animate-fade-in">Royal Zone Collection</p>
-          <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-4 animate-slide-up">Perfumes</h1>
-          <p className="text-gray-300 text-base max-w-md animate-fade-in delay-200">Discover scents that tell your story</p>
-        </div>
-      </div>
+      <SEO
+        title={`Royal Zone | ${pageTitle} — Premium Luxury Fragrances Pakistan`}
+        description={pageSubtitle}
+      />
 
+      {/* ══════════════════════════════════════════════════
+          DYNAMIC RESPONSIVE CINEMATIC BANNER WITH TRANSITIONS
+      ══════════════════════════════════════════════════ */}
+      {gender === 'women' ? (
+        /* ── WOMEN ONLY BANNER (For Her Page) with Logo Watermark Visible on Phone, Tab & Desktop ── */
+        <div
+          className="relative h-72 sm:h-80 md:h-96 overflow-hidden flex items-center cursor-pointer group"
+          style={{ background: 'linear-gradient(145deg, #1C0407 0%, #3D0B12 50%, #1A0306 100%)' }}
+          onMouseEnter={() => setBannerHovered(true)}
+          onMouseLeave={() => setBannerHovered(false)}
+        >
+          {/* Logo crest watermark — visible on mobile, tablet & desktop in left background */}
+          <div className="absolute left-4 sm:left-10 md:left-16 lg:left-24 top-1/2 -translate-y-1/2 pointer-events-none z-0">
+            <img
+              src="/logo.png"
+              alt=""
+              className="w-36 sm:w-56 md:w-72 lg:w-80 h-36 sm:h-56 md:h-72 lg:h-80 object-contain opacity-20 sm:opacity-20 md:opacity-15 transition-all duration-700 group-hover:opacity-30 group-hover:scale-110 filter brightness-0 invert"
+            />
+          </div>
+
+          {/* Women editorial image with smooth zoom transition */}
+          <div className="absolute inset-0 flex justify-end">
+            <div className="relative w-full md:w-1/2 h-full overflow-hidden">
+              <img
+                src="/hero-women.png"
+                alt="Royal Zone — For Her"
+                className="w-full h-full object-cover transition-all duration-700 ease-out"
+                style={{
+                  objectPosition: 'right 0%',
+                  transform: `scaleX(-1) scale(${bannerHovered ? 1.08 : 1.0})`,
+                  filter: `brightness(${bannerHovered ? 1.15 : 1.02}) saturate(${bannerHovered ? 1.15 : 1.05})`,
+                }}
+              />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to right, #1C0407 0%, rgba(28,4,7,0.5) 65%, transparent 100%)' }} />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, #1C0407 0%, transparent 60%)' }} />
+            </div>
+          </div>
+
+          <div className="container-custom relative z-10 text-left px-4">
+            <div className="max-w-md">
+              <p className="text-gold-400 text-xs font-bold uppercase tracking-[0.35em] mb-3 transition-transform duration-500 group-hover:translate-x-1">
+                Royal Zone Collection
+              </p>
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-3 leading-none transition-transform duration-500 group-hover:-translate-y-1">
+                For Her
+              </h1>
+              <div
+                className="h-[2px] mb-4 transition-all duration-500"
+                style={{
+                  width: bannerHovered ? '96px' : '64px',
+                  background: 'linear-gradient(90deg, #E6A8A8, #C9A96E, transparent)',
+                }}
+              />
+              <p className="text-rose-100/90 text-sm sm:text-base md:text-lg font-light leading-relaxed">
+                {pageSubtitle}
+              </p>
+            </div>
+          </div>
+        </div>
+
+      ) : gender === 'men' ? (
+
+        /* ── MEN ONLY BANNER (For Him Page) with Logo Watermark Visible on Phone, Tab & Desktop ── */
+        <div
+          className="relative h-72 sm:h-80 md:h-96 overflow-hidden flex items-center cursor-pointer group"
+          style={{ background: 'linear-gradient(145deg, #06080C 0%, #121722 50%, #06080C 100%)' }}
+          onMouseEnter={() => setBannerHovered(true)}
+          onMouseLeave={() => setBannerHovered(false)}
+        >
+          {/* Logo crest watermark — visible on mobile, tablet & desktop in right background */}
+          <div className="absolute right-4 sm:right-10 md:right-16 lg:right-24 top-1/2 -translate-y-1/2 pointer-events-none z-0">
+            <img
+              src="/logo.png"
+              alt=""
+              className="w-36 sm:w-56 md:w-72 lg:w-80 h-36 sm:h-56 md:h-72 lg:h-80 object-contain opacity-20 sm:opacity-20 md:opacity-15 transition-all duration-700 group-hover:opacity-30 group-hover:scale-110 filter brightness-0 invert"
+            />
+          </div>
+
+          {/* Men editorial image with smooth zoom transition */}
+          <div className="absolute inset-0 flex justify-start">
+            <div className="relative w-full md:w-1/2 h-full overflow-hidden">
+              <img
+                src="/hero-men.png"
+                alt="Royal Zone — For Him"
+                className="w-full h-full object-cover transition-all duration-700 ease-out"
+                style={{
+                  objectPosition: 'left 0%',
+                  transform: `scaleX(-1) scale(${bannerHovered ? 1.08 : 1.0})`,
+                  filter: `brightness(${bannerHovered ? 1.15 : 1.02}) saturate(${bannerHovered ? 1.15 : 1.05})`,
+                }}
+              />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to left, #06080C 0%, rgba(6,8,12,0.5) 65%, transparent 100%)' }} />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, #06080C 0%, transparent 60%)' }} />
+            </div>
+          </div>
+
+          <div className="container-custom relative z-10 text-right px-4 flex justify-end">
+            <div className="max-w-md">
+              <p className="text-gold-400 text-xs font-bold uppercase tracking-[0.35em] mb-3 transition-transform duration-500 group-hover:-translate-x-1">
+                Royal Zone Collection
+              </p>
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-3 leading-none transition-transform duration-500 group-hover:-translate-y-1">
+                For Him
+              </h1>
+              <div
+                className="h-[2px] ml-auto mb-4 transition-all duration-500"
+                style={{
+                  width: bannerHovered ? '96px' : '64px',
+                  background: 'linear-gradient(90deg, transparent, #C9A96E, #94A3B8)',
+                }}
+              />
+              <p className="text-slate-200/90 text-sm sm:text-base md:text-lg font-light leading-relaxed">
+                {pageSubtitle}
+              </p>
+            </div>
+          </div>
+        </div>
+
+      ) : (
+
+        /* ── ALL PERFUMES RESPONSIVE BANNER: 50/50 SPLIT WITH HOVER & TOUCH TRANSITION ── */
+        <div className="relative h-64 sm:h-80 md:h-96 overflow-hidden select-none bg-black">
+          {/* 50/50 Split Panels */}
+          <div className="absolute inset-0 flex flex-row w-full h-full">
+
+            {/* Left — Women */}
+            <div
+              className="relative overflow-hidden cursor-pointer h-full"
+              style={{
+                flex: hoveredSplit === 'women' ? '0 0 60%' : hoveredSplit === 'men' ? '0 0 40%' : '0 0 50%',
+                transition: 'flex 0.65s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+              onMouseEnter={() => setHoveredSplit('women')}
+              onMouseLeave={() => setHoveredSplit(null)}
+              onTouchStart={() => setHoveredSplit('women')}
+            >
+              <img
+                src="/hero-women.png"
+                alt="Women's Fragrances"
+                className="w-full h-full object-cover"
+                style={{
+                  objectPosition: 'right 0%',
+                  transform: `scaleX(-1) scale(${hoveredSplit === 'women' ? 1.06 : 1.0})`,
+                  filter: `brightness(${hoveredSplit === 'men' ? 0.45 : 1.05})`,
+                  transition: 'transform 0.65s ease, filter 0.65s ease',
+                }}
+              />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(28,4,7,0.7) 0%, transparent 70%)' }} />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%)' }} />
+              
+              {/* Bottom label */}
+              <div className="absolute bottom-2.5 sm:bottom-6 left-3 sm:left-6 z-10 pointer-events-none">
+                <p className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.25em] text-amber-300/85 mb-0.5">Collection</p>
+                <h3 className="font-display text-sm sm:text-2xl md:text-3xl font-bold text-white">For Her</h3>
+              </div>
+            </div>
+
+            {/* Right — Men */}
+            <div
+              className="relative overflow-hidden cursor-pointer h-full"
+              style={{
+                flex: hoveredSplit === 'men' ? '0 0 60%' : hoveredSplit === 'women' ? '0 0 40%' : '0 0 50%',
+                transition: 'flex 0.65s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+              onMouseEnter={() => setHoveredSplit('men')}
+              onMouseLeave={() => setHoveredSplit(null)}
+              onTouchStart={() => setHoveredSplit('men')}
+            >
+              <img
+                src="/hero-men.png"
+                alt="Men's Fragrances"
+                className="w-full h-full object-cover"
+                style={{
+                  objectPosition: 'left 0%',
+                  transform: `scaleX(-1) scale(${hoveredSplit === 'men' ? 1.06 : 1.0})`,
+                  filter: `brightness(${hoveredSplit === 'women' ? 0.45 : 1.05})`,
+                  transition: 'transform 0.65s ease, filter 0.65s ease',
+                }}
+              />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to left, rgba(6,8,12,0.7) 0%, transparent 70%)' }} />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%)' }} />
+              
+              {/* Bottom label */}
+              <div className="absolute bottom-2.5 sm:bottom-6 right-3 sm:right-6 z-10 text-right pointer-events-none">
+                <p className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.25em] text-amber-300/85 mb-0.5">Collection</p>
+                <h3 className="font-display text-sm sm:text-2xl md:text-3xl font-bold text-white">For Him</h3>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Responsive Center Seam & Sleek Title Badge */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20 text-center px-3">
+            <div className="w-auto max-w-[75%] sm:max-w-xs md:max-w-md px-3.5 py-2 sm:px-6 sm:py-3.5 bg-black/75 border border-gold-500/40 backdrop-blur-md shadow-2xl rounded-sm sm:rounded-md">
+              <img
+                src="/logo.png"
+                alt="Royal Zone"
+                className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7 mx-auto mb-1 object-contain filter brightness-0 invert opacity-90"
+              />
+              <p className="text-gold-400 text-[7px] sm:text-[9px] md:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-0.5 sm:mb-1">
+                Royal Zone Collection
+              </p>
+              <h1 className="font-display text-lg sm:text-2xl md:text-4xl font-bold text-white mb-0.5 sm:mb-1">
+                Perfumes
+              </h1>
+              <div className="h-[1px] w-8 sm:w-14 mx-auto mb-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+              <p className="text-gray-300 text-[8px] sm:text-xs font-light tracking-wide">
+                Discover scents that tell your story
+              </p>
+            </div>
+          </div>
+        </div>
+
+      )}
+
+      {/* ══════════════════════════════════════════════════
+          PRODUCTS GRID & FILTERS
+      ══════════════════════════════════════════════════ */}
       <div className="container-custom py-12">
         {/* Filter & Sort Bar */}
         <div className="flex flex-col lg:flex-row gap-4 mb-8 bg-white dark:bg-navy-800 p-4 rounded-2xl shadow-card">

@@ -31,9 +31,8 @@ const CartPage = () => {
         <div className="text-8xl mb-6 animate-float">🛒</div>
         <h2 className="font-display text-4xl font-bold text-gray-900 dark:text-white mb-4">Your Cart is Empty</h2>
         <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md">Looks like you haven't added anything yet. Explore our luxury collections to find something special.</p>
-        <div className="flex gap-4">
-          <Link to="/perfumes" className="btn-primary px-8 py-3">Shop Perfumes</Link>
-          <Link to="/bedsheets" className="btn-secondary px-8 py-3">Shop Bedsheets</Link>
+        <div className="flex justify-center gap-4">
+          <Link to="/perfumes" className="btn-primary px-8 py-3">Explore Fragrances</Link>
         </div>
       </div>
     );

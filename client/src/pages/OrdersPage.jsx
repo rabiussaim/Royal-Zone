@@ -83,7 +83,7 @@ const OrdersPage = () => {
           <div className="text-center py-20 bg-white dark:bg-navy-800 rounded-3xl p-8 shadow-card">
             <div className="text-8xl mb-6">📦</div>
             <h2 className="font-display text-3xl font-bold text-gray-700 dark:text-gray-300 mb-4">No Orders Found</h2>
-            <p className="text-gray-500 mb-8 max-w-md mx-auto">You haven't placed any orders yet. Explore our luxury perfume and bedsheet collections to get started!</p>
+            <p className="text-gray-500 mb-8 max-w-md mx-auto">You haven't placed any orders yet. Explore our luxury perfume collections to get started!</p>
             <Link to="/" className="btn-primary px-8 py-3">Start Shopping</Link>
           </div>
         ) : (

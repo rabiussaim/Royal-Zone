@@ -16,7 +16,8 @@ const Footer = () => {
 
   const categories = [
     { label: 'Perfumes', to: '/perfumes' },
-    { label: 'Bedsheets', to: '/bedsheets' },
+    { label: "Women's Collection", to: '/perfumes?gender=women' },
+    { label: "Men's Collection", to: '/perfumes?gender=men' },
     { label: 'New Arrivals', to: '/perfumes?filter=new' },
     { label: 'Best Sellers', to: '/perfumes?filter=bestseller' },
     { label: 'Luxury Collection', to: '/perfumes?filter=luxury' },
@@ -95,16 +96,16 @@ const Footer = () => {
               <span>ROYAL ZONE</span>
             </Link>
             <p className="text-sm text-gray-400 leading-relaxed mb-6">
-              Elevating everyday living with premium perfumes and luxury bedsheets. Experience the art of refined living.
+              Elevating everyday living with premium luxury Oud and French perfumes. Experience the art of refined fragrance.
             </p>
             {/* Social Icons */}
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
               {socialLinks.map((s) => (
                 <a
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
-                  className="w-9 h-9 rounded-full bg-navy-800 border border-gray-700 hover:border-gold-500 hover:text-gold-500 hover:bg-gold-500/10 flex items-center justify-center transition-all duration-300 hover:-translate-y-0.5"
+                  className="w-9 h-9 rounded-full bg-white/5 hover:bg-gold-500 hover:text-navy-900 flex items-center justify-center transition-colors duration-200"
                 >
                   {s.icon}
                 </a>
@@ -112,110 +113,69 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Categories */}
-          <div>
-            <h4 className="font-display text-white font-semibold mb-5 text-lg">Categories</h4>
-            <ul className="space-y-2.5">
-              {categories.map((c) => (
-                <li key={c.label}>
-                  <Link
-                    to={c.to}
-                    className="text-sm text-gray-400 hover:text-gold-500 transition-colors flex items-center gap-2 group"
-                  >
-                    <span className="w-1 h-1 rounded-full bg-gold-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    {c.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Quick Links */}
           <div>
-            <h4 className="font-display text-white font-semibold mb-5 text-lg">Quick Links</h4>
+            <h3 className="text-gold-400 font-display font-semibold text-base uppercase tracking-wider mb-5">Quick Links</h3>
             <ul className="space-y-2.5">
-              {quickLinks.map((l) => (
-                <li key={l.label}>
-                  <Link
-                    to={l.to}
-                    className="text-sm text-gray-400 hover:text-gold-500 transition-colors flex items-center gap-2 group"
-                  >
-                    <span className="w-1 h-1 rounded-full bg-gold-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    {l.label}
+              {quickLinks.map((link) => (
+                <li key={link.label}>
+                  <Link to={link.to} className="text-sm text-gray-400 hover:text-gold-400 transition-colors duration-200">
+                    {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact + Newsletter */}
+          {/* Categories */}
           <div>
-            <h4 className="font-display text-white font-semibold mb-5 text-lg">Contact Us</h4>
-            <ul className="space-y-3 mb-7 text-sm text-gray-400">
-              <li className="flex gap-2">
-                <svg className="w-4 h-4 text-gold-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Lahore, Pakistan
-              </li>
-              <li className="flex gap-2">
-                <svg className="w-4 h-4 text-gold-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                +92 336 7947525
-              </li>
-              <li className="flex gap-2">
-                <svg className="w-4 h-4 text-gold-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                saimlinkedin0000@gmail.com
-              </li>
+            <h3 className="text-gold-400 font-display font-semibold text-base uppercase tracking-wider mb-5">Collections</h3>
+            <ul className="space-y-2.5">
+              {categories.map((cat) => (
+                <li key={cat.label}>
+                  <Link to={cat.to} className="text-sm text-gray-400 hover:text-gold-400 transition-colors duration-200">
+                    {cat.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
+          </div>
 
-            {/* Newsletter */}
-            <h4 className="font-display text-white font-semibold mb-3 text-base">Newsletter</h4>
+          {/* Newsletter */}
+          <div>
+            <h3 className="text-gold-400 font-display font-semibold text-base uppercase tracking-wider mb-5">Join the Royal Circle</h3>
+            <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+              Subscribe for exclusive fragrance releases, private sales, and perfumery insights.
+            </p>
             {subscribed ? (
-              <p className="text-green-400 text-sm font-medium">✓ Subscribed! Thank you.</p>
+              <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-sm">
+                ✓ Thank you for subscribing!
+              </div>
             ) : (
-              <form onSubmit={handleSubscribe} className="flex gap-2">
+              <form onSubmit={handleSubscribe} className="space-y-3">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email"
+                  placeholder="Enter your email"
                   required
-                  className="flex-1 min-w-0 px-3 py-2 rounded-lg text-sm bg-navy-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-gold-500 transition-colors"
+                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-gold-500 transition-colors"
                 />
-                <button
-                  type="submit"
-                  className="px-3 py-2 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:shadow-gold"
-                  style={{ background: 'linear-gradient(135deg, #C9A96E, #B8955A)' }}
-                >
-                  Join
+                <button type="submit" className="w-full btn-primary py-2.5 text-sm">
+                  Subscribe
                 </button>
               </form>
             )}
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="h-px w-full mb-6" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,169,110,0.3), transparent)' }} />
-
         {/* Bottom Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>© {new Date().getFullYear()} Royal Zone. All rights reserved.</p>
-          <div className="flex gap-4">
-            <Link to="/about" className="hover:text-gold-500 transition-colors">Privacy Policy</Link>
-            <Link to="/about" className="hover:text-gold-500 transition-colors">Terms of Service</Link>
-            <Link to="/contact" className="hover:text-gold-500 transition-colors">Support</Link>
-          </div>
-          {/* Payment icons text */}
-          <div className="flex items-center gap-2 text-gray-600">
-            <span>💳</span>
-            <span>🏦</span>
-            <span>💵</span>
-            <span>COD Available</span>
+        <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+          <p>© {new Date().getFullYear()} Royal Zone. All rights reserved. Premium Fragrances.</p>
+          <div className="flex items-center gap-6">
+            <span className="hover:text-gray-400 cursor-pointer">Privacy Policy</span>
+            <span className="hover:text-gray-400 cursor-pointer">Terms of Service</span>
+            <span className="hover:text-gray-400 cursor-pointer">Shipping & Returns</span>
           </div>
         </div>
       </div>

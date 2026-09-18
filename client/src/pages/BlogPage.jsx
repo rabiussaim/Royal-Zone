@@ -20,8 +20,8 @@ const BlogPage = () => {
     <>
       <SEO
         title="Royal Luxury Journal & Fragrance Blog"
-        description="Explore luxury Oud perfume buying guides, Egyptian cotton bedsheet care tips, and fragrance layering secrets from Royal Zone experts."
-        keywords="luxury perfume blog, oud perfume guide, egyptian cotton care, luxury lifestyle blog, royal zone journal"
+        description="Explore luxury Oud perfume buying guides, French fragrance notes, and perfume layering secrets from Royal Zone fragrance experts."
+        keywords="luxury perfume blog, oud perfume guide, fragrance notes, luxury fragrance blog, royal zone journal"
       />
 
       <div className="pt-28 min-h-screen bg-cream-50 dark:bg-navy-900">

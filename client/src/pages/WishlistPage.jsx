@@ -17,9 +17,8 @@ const WishlistPage = () => {
             <div className="text-8xl mb-6 animate-float">❤️</div>
             <h2 className="font-display text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4">Your Wishlist is Empty</h2>
             <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md">Save items you love to your wishlist. Review them anytime and move them to cart easily.</p>
-            <div className="flex gap-4">
-              <Link to="/perfumes" className="btn-primary px-8 py-3">Shop Perfumes</Link>
-              <Link to="/bedsheets" className="btn-secondary px-8 py-3">Shop Bedsheets</Link>
+            <div className="flex justify-center gap-4">
+              <Link to="/perfumes" className="btn-primary px-8 py-3">Explore Fragrances</Link>
             </div>
           </div>
         ) : (

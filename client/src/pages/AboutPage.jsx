@@ -11,7 +11,7 @@ const TEAM = [
 const MILESTONES = [
   { year: '2020', event: 'Royal Zone founded in Lahore with a vision to democratize luxury.' },
   { year: '2021', event: 'Launched our first Oud collection. Sold out within 2 weeks.' },
-  { year: '2022', event: 'Expanded to bedsheets. 500+ happy customers in Year 2.' },
+  { year: '2022', event: 'Expanded our French & Oriental perfume lines. 500+ happy customers in Year 2.' },
   { year: '2023', event: 'Launched the Luxury Collection and expanded to 3 Pakistani cities.' },
   { year: '2024', event: 'Crossed 1000 orders. Started international shipping.' },
   { year: '2025', event: 'Launched our e-commerce platform. 5★ rated brand on Google.' },
@@ -32,7 +32,7 @@ const AboutPage = () => {
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
           <p className="text-gold-400 text-sm font-medium uppercase tracking-widest mb-3">Our Story</p>
           <h1 className="font-display text-5xl md:text-6xl font-bold text-white mb-4 animate-slide-up">About Royal Zone</h1>
-          <p className="text-gray-200 text-lg max-w-2xl animate-fade-in">Elevating everyday living with premium luxury products since 2020</p>
+          <p className="text-gray-200 text-lg max-w-2xl animate-fade-in">Elevating everyday living with premium luxury perfumes since 2020</p>
         </div>
       </div>
 
@@ -42,7 +42,7 @@ const AboutPage = () => {
           <div>
             <p className="text-gold-500 text-sm font-medium uppercase tracking-widest mb-3">Our Mission</p>
             <h2 className="font-display text-4xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">Luxury Should Be For Everyone</h2>
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-5">Royal Zone was born from a simple belief: that premium quality products shouldn't be reserved for the elite. We source the finest perfumes and bedsheets from around the world and make them accessible to every Pakistani home.</p>
+            <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-5">Royal Zone was born from a simple belief: that premium quality fragrances shouldn't be reserved for the elite. We source the finest perfumes from around the world and make them accessible to every fragrance lover.</p>
             <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-8">Every product in our collection passes through a rigorous quality check. We partner with certified manufacturers and fragrance houses to ensure every item meets our exacting standards.</p>
             <div className="flex gap-6">
               <div className="text-center">

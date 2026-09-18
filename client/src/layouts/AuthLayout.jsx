@@ -15,7 +15,7 @@ const AuthLayout = ({ children }) => {
             <img src="/logo.png" alt="Royal Zone Logo" className="h-28 w-auto object-contain transition-transform duration-300 group-hover:scale-105" />
             <span className="font-display text-2xl font-bold text-gold-500 tracking-wider">ROYAL ZONE</span>
           </Link>
-          <p className="text-gray-400 text-sm mt-1">Luxury Perfumes & Bedsheets</p>
+          <p className="text-gray-400 text-sm mt-1">The Scent of Royalty — Luxury Fragrances</p>
         </div>
         {children}
         <p className="text-center text-xs text-gray-600 mt-6">

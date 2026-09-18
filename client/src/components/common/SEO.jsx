@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 
-const DEFAULT_TITLE = 'Royal Zone | Luxury Oud Perfumes & 1000TC Cotton Bedsheets Pakistan';
-const DEFAULT_DESCRIPTION = 'Shop Royal Zone for premium luxury Oud perfumes, French fragrances, and 1000TC Egyptian Cotton bedsheet sets across Pakistan. Express Delivery & Cash on Delivery available.';
-const DEFAULT_KEYWORDS = 'luxury perfumes pakistan, oud al qamar, egyptian cotton bedsheets, french fragrances, royal zone online store, luxury bedding set, cash on delivery perfumes';
+const DEFAULT_TITLE = 'Royal Zone | Premium Luxury Oud & French Perfumes Pakistan';
+const DEFAULT_DESCRIPTION = 'Shop Royal Zone for premium luxury Oud perfumes, French fragrances, and signature scents across Pakistan. Express Delivery & Cash on Delivery available.';
+const DEFAULT_KEYWORDS = 'luxury perfumes pakistan, oud al qamar, french fragrances, royal zone online store, luxury scents, cash on delivery perfumes, mens perfumes, womens perfumes';
 const SITE_URL = 'https://royalzone.pk';
 
 const SEO = ({
