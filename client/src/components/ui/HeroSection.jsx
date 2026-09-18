@@ -12,6 +12,14 @@ const HeroSection = () => {
   const [hovered, setHovered] = useState(null); // 'women' | 'men' | null
   const [wErr, setWErr] = useState(false);
   const [mErr, setMErr] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase(1), 80);
@@ -23,9 +31,15 @@ const HeroSection = () => {
   const wDimmed = hovered === 'men';
   const mDimmed = hovered === 'women';
 
-  // Flex sizes for hover expand/contract on desktop
-  const wFlex = hovered === 'women' ? '0 0 60%' : hovered === 'men' ? '0 0 40%' : '0 0 50%';
-  const mFlex = hovered === 'men'   ? '0 0 60%' : hovered === 'women' ? '0 0 40%' : '0 0 50%';
+  // Flex sizes for hover expand/contract ONLY on desktop
+  const wFlex = isDesktop
+    ? (hovered === 'women' ? '0 0 60%' : hovered === 'men' ? '0 0 40%' : '0 0 50%')
+    : '1 1 50%';
+
+  const mFlex = isDesktop
+    ? (hovered === 'men' ? '0 0 60%' : hovered === 'women' ? '0 0 40%' : '0 0 50%')
+    : '1 1 50%';
+
   const panelTransition = 'flex 0.75s cubic-bezier(0.4, 0, 0.2, 1)';
 
   return (
@@ -33,7 +47,7 @@ const HeroSection = () => {
       id="hero"
       aria-label="Royal Zone luxury fragrance hero"
       className="relative w-full overflow-hidden select-none"
-      style={{ height: '100svh', minHeight: '600px', maxHeight: '1080px' }}
+      style={{ height: '100svh', minHeight: '560px', maxHeight: '1080px' }}
     >
       {/* ══════════════════════════════════════════════════
           SPLIT PANELS
@@ -103,21 +117,19 @@ const HeroSection = () => {
           }} />
 
           {/* ── WOMEN TEXT CONTENT ── */}
-          <div className="absolute bottom-0 left-0 p-6 md:p-10 lg:p-14 z-10 flex flex-col items-start">
+          <div className="absolute bottom-2 sm:bottom-0 left-0 p-3.5 sm:p-6 md:p-10 lg:p-14 z-10 flex flex-col items-start">
 
             {/* FOR HER tag */}
             <div
               className={`transition-all duration-700 ${phase >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
               style={{ transitionDelay: '0ms' }}
             >
-              <p style={{
+              <p className="mb-1 sm:mb-3 text-[0.55rem] sm:text-[0.62rem]" style={{
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 700,
-                fontSize: '0.62rem',
                 letterSpacing: '0.42em',
                 color: wDimmed ? 'rgba(255,255,255,0.25)' : 'rgba(201,169,110,0.85)',
                 textTransform: 'uppercase',
-                marginBottom: '14px',
                 transition: 'color 0.6s ease',
               }}>For Her</p>
             </div>
@@ -127,13 +139,12 @@ const HeroSection = () => {
               className={`transition-all duration-700 ${phase >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
               style={{ transitionDelay: '110ms' }}
             >
-              <h2 style={{
+              <h2 className="mb-1.5 sm:mb-4" style={{
                 fontFamily: '"Playfair Display", serif',
                 fontWeight: 700,
-                fontSize: 'clamp(1.8rem, 3.8vw, 3.4rem)',
+                fontSize: 'clamp(1.3rem, 3.5vw, 3.4rem)',
                 color: wDimmed ? 'rgba(255,255,255,0.4)' : '#fff',
                 lineHeight: 1.05,
-                marginBottom: '20px',
                 textShadow: '0 2px 28px rgba(0,0,0,0.65)',
                 transition: 'color 0.6s ease',
               }}>
@@ -145,11 +156,10 @@ const HeroSection = () => {
             </div>
 
             {/* Expanding accent line */}
-            <div style={{
+            <div className="mb-2 sm:mb-5" style={{
               height: '1.5px',
               width: hovered === 'women' ? '80px' : '44px',
               background: 'linear-gradient(90deg, rgba(201,169,110,0.85), transparent)',
-              marginBottom: '24px',
               transition: 'width 0.55s cubic-bezier(0.4,0,0.2,1)',
               opacity: wDimmed ? 0.2 : 1,
             }} />
@@ -160,17 +170,15 @@ const HeroSection = () => {
             >
               <Link
                 to="/perfumes?gender=women"
-                className="group inline-flex items-center gap-3"
+                className="group inline-flex items-center gap-2 sm:gap-3"
                 style={{ opacity: wDimmed ? 0.35 : 1, transition: 'opacity 0.6s ease' }}
               >
-                <span style={{
+                <span className="px-4 py-1.5 sm:px-6 sm:py-2.5 text-[0.55rem] sm:text-[0.6rem]" style={{
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 700,
-                  fontSize: '0.6rem',
                   letterSpacing: '0.3em',
                   textTransform: 'uppercase',
                   color: '#fff',
-                  padding: '11px 26px',
                   border: `1px solid rgba(201,169,110,${hovered === 'women' ? 0.7 : 0.28})`,
                   background: hovered === 'women'
                     ? 'rgba(107,20,20,0.55)'
@@ -258,21 +266,19 @@ const HeroSection = () => {
           }} />
 
           {/* ── MEN TEXT CONTENT ── */}
-          <div className="absolute bottom-0 right-0 p-6 md:p-10 lg:p-14 z-10 flex flex-col items-end text-right">
+          <div className="absolute bottom-2 sm:bottom-0 right-0 p-3.5 sm:p-6 md:p-10 lg:p-14 z-10 flex flex-col items-end text-right max-w-[280px] sm:max-w-[340px] md:max-w-[380px]">
 
             {/* FOR HIM tag */}
             <div
               className={`transition-all duration-700 ${phase >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
               style={{ transitionDelay: '80ms' }}
             >
-              <p style={{
+              <p className="mb-1 sm:mb-3 text-[0.55rem] sm:text-[0.62rem]" style={{
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 700,
-                fontSize: '0.62rem',
                 letterSpacing: '0.42em',
                 color: mDimmed ? 'rgba(255,255,255,0.25)' : 'rgba(201,169,110,0.85)',
                 textTransform: 'uppercase',
-                marginBottom: '14px',
                 transition: 'color 0.6s ease',
               }}>For Him</p>
             </div>
@@ -282,17 +288,17 @@ const HeroSection = () => {
               className={`transition-all duration-700 ${phase >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
               style={{ transitionDelay: '180ms' }}
             >
-              <h2 style={{
+              <h2 className="mb-1.5 sm:mb-4" style={{
                 fontFamily: '"Playfair Display", serif',
                 fontWeight: 700,
-                fontSize: 'clamp(1.8rem, 3.8vw, 3.4rem)',
+                fontSize: 'clamp(1.3rem, 3.2vw, 2.8rem)',
                 color: mDimmed ? 'rgba(255,255,255,0.4)' : '#fff',
-                lineHeight: 1.05,
-                marginBottom: '20px',
-                textShadow: '0 2px 28px rgba(0,0,0,0.8)',
+                lineHeight: 1.08,
+                textShadow: '0 2px 28px rgba(0,0,0,0.9)',
                 transition: 'color 0.6s ease',
               }}>
-                Bold. Distinctive.<br />
+                Bold.<br />
+                Distinctive.<br />
                 <em style={{ color: mDimmed ? 'rgba(176,176,176,0.35)' : '#C8C8C8', transition: 'color 0.6s ease' }}>
                   Timeless.
                 </em>
@@ -300,11 +306,10 @@ const HeroSection = () => {
             </div>
 
             {/* Expanding accent line */}
-            <div style={{
+            <div className="mb-2 sm:mb-5" style={{
               height: '1.5px',
               width: hovered === 'men' ? '80px' : '44px',
               background: 'linear-gradient(90deg, transparent, rgba(201,169,110,0.85))',
-              marginBottom: '24px',
               transition: 'width 0.55s cubic-bezier(0.4,0,0.2,1)',
               opacity: mDimmed ? 0.2 : 1,
             }} />
@@ -315,7 +320,7 @@ const HeroSection = () => {
             >
               <Link
                 to="/perfumes?gender=men"
-                className="group inline-flex items-center gap-3"
+                className="group inline-flex items-center gap-2 sm:gap-3"
                 style={{ opacity: mDimmed ? 0.35 : 1, transition: 'opacity 0.6s ease' }}
               >
                 <span style={{
@@ -326,14 +331,12 @@ const HeroSection = () => {
                   transition: 'transform 0.35s ease',
                   display: 'inline-block',
                 }}>←</span>
-                <span style={{
+                <span className="px-4 py-1.5 sm:px-6 sm:py-2.5 text-[0.55rem] sm:text-[0.6rem]" style={{
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 700,
-                  fontSize: '0.6rem',
                   letterSpacing: '0.3em',
                   textTransform: 'uppercase',
                   color: '#fff',
-                  padding: '11px 26px',
                   border: `1px solid rgba(201,169,110,${hovered === 'men' ? 0.7 : 0.28})`,
                   background: hovered === 'men'
                     ? 'rgba(20,20,20,0.65)'
@@ -470,31 +473,36 @@ const HeroSection = () => {
       </div>
 
       {/* ══════════════════════════════════════════════════
-          MOBILE — Brand badge between stacked panels
+          MOBILE — Brand emblem badge between stacked panels
       ══════════════════════════════════════════════════ */}
       <div
-        className={`md:hidden absolute z-20 flex justify-center transition-all duration-700 ${phase >= 3 ? 'opacity-100' : 'opacity-0'}`}
+        className={`md:hidden absolute z-20 flex justify-center transition-all duration-700 ${phase >= 3 ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
         style={{
           top: '50%',
           left: 0,
           right: 0,
           transform: 'translateY(-50%)',
           transitionDelay: '200ms',
+          pointerEvents: 'none',
         }}
       >
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '10px',
-          padding: '8px 18px',
-          background: 'rgba(0,0,0,0.6)',
-          border: '1px solid rgba(201,169,110,0.3)',
-          backdropFilter: 'blur(16px)',
+          gap: '9px',
+          padding: '7px 18px',
+          background: 'rgba(5,5,5,0.85)',
+          border: '1px solid rgba(201,169,110,0.45)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '99px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.7), 0 0 16px rgba(201,169,110,0.15)',
         }}>
-          <div style={{ width: '28px', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(201,169,110,0.6))' }} />
-          <img src="/logo.png" alt="Royal Zone" style={{ width: '20px', height: '20px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
-          <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, fontSize: '0.45rem', letterSpacing: '0.3em', color: '#fff', whiteSpace: 'nowrap' }}>ROYAL ZONE</p>
-          <div style={{ width: '28px', height: '1px', background: 'linear-gradient(90deg, rgba(201,169,110,0.6), transparent)' }} />
+          <div style={{ width: '22px', height: '1px', background: 'linear-gradient(90deg, transparent, rgba(201,169,110,0.75))' }} />
+          <img src="/logo.png" alt="Royal Zone" style={{ width: '18px', height: '18px', objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.95 }} />
+          <p style={{ fontFamily: '"Playfair Display", serif', fontWeight: 700, fontSize: '0.48rem', letterSpacing: '0.32em', color: '#fff', whiteSpace: 'nowrap' }}>
+            ROYAL ZONE
+          </p>
+          <div style={{ width: '22px', height: '1px', background: 'linear-gradient(90deg, rgba(201,169,110,0.75), transparent)' }} />
         </div>
       </div>
 

@@ -282,22 +282,22 @@ const PerfumesPage = () => {
 
           </div>
 
-          {/* Responsive Center Seam & Sleek Title Badge */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20 text-center px-3">
-            <div className="w-auto max-w-[75%] sm:max-w-xs md:max-w-md px-3.5 py-2 sm:px-6 sm:py-3.5 bg-black/75 border border-gold-500/40 backdrop-blur-md shadow-2xl rounded-sm sm:rounded-md">
+          {/* Responsive Center Seam & Sleek Compact Title Badge */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20 text-center px-2">
+            <div className="w-auto max-w-[55%] sm:max-w-xs md:max-w-md px-2.5 py-1.5 sm:px-6 sm:py-3.5 bg-black/80 border border-gold-500/40 backdrop-blur-md shadow-2xl rounded-sm sm:rounded-md">
               <img
                 src="/logo.png"
                 alt="Royal Zone"
-                className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7 mx-auto mb-1 object-contain filter brightness-0 invert opacity-90"
+                className="w-3.5 h-3.5 sm:w-6 sm:h-6 md:w-7 md:h-7 mx-auto mb-0.5 sm:mb-1 object-contain filter brightness-0 invert opacity-90"
               />
-              <p className="text-gold-400 text-[7px] sm:text-[9px] md:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-0.5 sm:mb-1">
+              <p className="text-gold-400 text-[6px] sm:text-[9px] md:text-xs font-bold uppercase tracking-[0.18em] sm:tracking-[0.3em] mb-0.5">
                 Royal Zone Collection
               </p>
-              <h1 className="font-display text-lg sm:text-2xl md:text-4xl font-bold text-white mb-0.5 sm:mb-1">
+              <h1 className="font-display text-xs sm:text-2xl md:text-4xl font-bold text-white leading-tight">
                 Perfumes
               </h1>
-              <div className="h-[1px] w-8 sm:w-14 mx-auto mb-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
-              <p className="text-gray-300 text-[8px] sm:text-xs font-light tracking-wide">
+              <div className="h-[1px] w-6 sm:w-14 mx-auto my-0.5 sm:my-1.5 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+              <p className="hidden sm:block text-gray-300 text-[8px] sm:text-xs font-light tracking-wide">
                 Discover scents that tell your story
               </p>
             </div>
