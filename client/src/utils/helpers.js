@@ -53,7 +53,8 @@ export const debounce = (func, wait = 300) => {
 export const getImageUrl = (path) => {
   if (!path) return 'https://picsum.photos/seed/product/600/600';
   if (path.startsWith('http')) return path;
-  return `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${path}`;
+  const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
+  return `${baseUrl}${path}`;
 };
 
 // Helper: Smooth scroll to top
