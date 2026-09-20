@@ -1,11 +1,3 @@
-const dns = require('dns');
-if (dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder('ipv4first');
-}
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch (e) {}
-
 const express = require('express');
 const dotenv = require('dotenv');
 // Load env vars immediately before other modules
@@ -38,21 +30,35 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Security middleware
 app.use(helmet());
-const allowedOrigins = process.env.CLIENT_URL
+
+// Hardcoded allowed origins — always permitted regardless of CLIENT_URL env var
+const HARDCODED_ORIGINS = [
+  'https://www.royalzonepk.com',
+  'https://royalzonepk.com',
+  'https://royal-zone.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+const envOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(',').map(url => url.trim())
-  : true;
+  : [];
+
+const allowedOrigins = [...new Set([...HARDCODED_ORIGINS, ...envOrigins])];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins === true) return callback(null, true);
-    if (Array.isArray(allowedOrigins) && allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    // Allow Vercel preview & production deployments
-    if (origin.endsWith('.vercel.app')) {
-      return callback(null, true);
-    }
-    return callback(null, true);
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    // Allow any Vercel preview deployment
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
+    // Allow any royalzonepk.com subdomain
+    if (origin.endsWith('royalzonepk.com')) return callback(null, true);
+    // Check against allowed list
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Log blocked origins for debugging
+    console.warn(`[CORS] Blocked origin: ${origin}`);
+    return callback(new Error(`CORS: origin ${origin} not allowed`), false);
   },
   credentials: true,
 }));
@@ -69,6 +75,21 @@ app.use('/api', (req, res, next) => {
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+const mongoose = require('mongoose');
+
+// Health check and root routes
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Royal Zone API Server Running' });
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Mount routers
 app.use('/api/auth', authRoutes);
