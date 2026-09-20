@@ -1,7 +1,11 @@
 const express = require('express');
 const dotenv = require('dotenv');
-// Load env vars immediately before other modules
+// Preserve dynamic host PORT assigned by IIS / SmarterASP / Heroku before loading .env
+const HOST_PORT = process.env.PORT;
 dotenv.config();
+if (HOST_PORT) {
+  process.env.PORT = HOST_PORT;
+}
 
 const cors = require('cors');
 const helmet = require('helmet');
