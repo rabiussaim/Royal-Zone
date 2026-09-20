@@ -16,7 +16,17 @@ export const AuthProvider = ({ children }) => {
     const initAuth = async () => {
       const token = storage.get('rz_token');
       const savedUser = storage.get('rz_user');
-      
+
+      // Clear stale remembered credentials if email doesn't match current owner
+      const remembered = storage.get('rz_remember');
+      if (remembered?.email && remembered.email.toLowerCase().trim() !== OWNER_EMAIL) {
+        // Also clear if the old wrong email (saimlinked0000) is stored
+        if (remembered.email.toLowerCase().includes('saimlinked0000')) {
+          storage.remove('rz_remember');
+          console.log('[Auth] Cleared stale remembered credentials');
+        }
+      }
+
       const setGuest = () => {
         const defaultUser = { _id: 'guest_' + Date.now(), name: 'Guest', email: '', role: 'user' };
         setUser(defaultUser);

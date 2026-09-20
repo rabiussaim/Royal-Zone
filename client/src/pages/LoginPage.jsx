@@ -262,7 +262,7 @@ const LoginPage = () => {
           <div className="mt-6 pt-4 border-t border-white/10 text-center">
             <button
               type="button"
-              onClick={() => setForm({ email: 'saimlinkedin0000@gmail.com', password: 'AdminPassword123!', rememberMe: true })}
+              onClick={() => setForm({ email: 'saimlinkedin0000@gmail.com', password: 'AdminPassword1231', rememberMe: true })}
               className="text-xs text-amber-400 hover:text-amber-300 font-semibold bg-amber-400/10 px-3 py-1.5 rounded-xl border border-amber-400/30 transition-all inline-flex items-center gap-1.5"
             >
               <span>👑</span> Fill Store Owner Credentials (saimlinkedin0000@gmail.com)
