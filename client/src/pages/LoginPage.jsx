@@ -55,12 +55,13 @@ const LoginPage = () => {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
+    const cleanEmail = form.email.trim().toLowerCase();
     try {
-      await login({ email: form.email, password: form.password });
+      await login({ email: cleanEmail, password: form.password });
 
       // Save or clear remembered credentials
       if (form.rememberMe) {
-        storage.set('rz_remember', { email: form.email, password: form.password });
+        storage.set('rz_remember', { email: cleanEmail, password: form.password });
       } else {
         storage.remove('rz_remember');
       }
@@ -68,6 +69,7 @@ const LoginPage = () => {
       toast('Welcome back! 👑', 'success');
       navigate('/');
     } catch (err) {
+      storage.remove('rz_remember');
       const msg = err.response?.data?.message || 'Invalid email or password';
       toast(msg, 'error');
       setErrors({ password: msg });
